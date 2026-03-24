@@ -1,0 +1,978 @@
+<%- include('../layouts/header', { title: 'Create Template' }) %>
+<%- include('../layouts/sidebar') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jodit@3.24.5/build/jodit.min.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jodit@3.24.5/build/jodit.min.js"></script>
+
+<style>
+ 
+  :root {
+    --primary:       #4361ee;
+    --primary-light: #eef0fd;
+    --primary-hover: #3451d1;
+    --success:       #2ec4b6;
+    --danger:        #e63946;
+    --bg:            #f4f5fb;
+    --surface:       #ffffff;
+    --border:        #e2e5f0;
+    --text:          #1e2030;
+    --text-muted:    #6b7194;
+    --radius:        10px;
+    --radius-sm:     7px;
+    --shadow-sm:     0 1px 4px rgba(0,0,0,.06);
+    --shadow:        0 4px 20px rgba(0,0,0,.08);
+  }
+
+  body { background: var(--bg); font-size: 14px; }
+
+ 
+  .page-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  
+  .btn-pg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .18s ease;
+  }
+  .btn-pg-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-pg-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-pg-outline {
+    background: var(--primary-light);
+    border: 1px solid #c8d0fa;
+    color: var(--primary);
+  }
+  .btn-pg-outline:hover { background: var(--primary); color: #fff; }
+  .btn-pg-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(67,97,238,.28);
+  }
+  .btn-pg-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 14px rgba(67,97,238,.38);
+    transform: translateY(-1px);
+  }
+  .btn-pg-primary:active { transform: translateY(0); }
+  .btn-pg-primary:disabled { opacity: .7; cursor: not-allowed; transform: none; }
+
+  
+  .pg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .pg-card-header {
+    padding: 12px 18px;
+    background: #fafbff;
+    border-bottom: 1px solid var(--border);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .pg-card-body { padding: 18px; }
+
+  .form-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    margin-bottom: 6px !important;
+  }
+
+  .form-control {
+    font-size: 13.5px;
+    border-color: var(--border);
+    border-radius: var(--radius-sm) !important;
+    padding: 8px 12px;
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .form-control:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(67,97,238,.1) !important;
+  }
+  .form-control::placeholder { color: #b4b9ce; }
+  .form-control:disabled { background: var(--bg); cursor: not-allowed; }
+
+
+  .tag-input-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    min-height: 40px;
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: text;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .tag-input-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67,97,238,.1);
+  }
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px 2px 10px;
+    background: var(--primary-light);
+    border: 1px solid #c8d0fa;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--primary);
+    white-space: nowrap;
+    max-width: 220px;
+  }
+  .tag-chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tag-chip-x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .tag-chip-x:hover { background: rgba(67,97,238,.18); }
+  .tag-real-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text);
+    min-width: 150px;
+    flex: 1;
+    padding: 2px 4px;
+    font-family: inherit;
+  }
+  .tag-real-input::placeholder { color: #b4b9ce; }
+  .tag-chip.invalid {
+    background: #fff0f0;
+    border-color: #ffb3b3;
+    color: var(--danger);
+  }
+
+  .device-toggle {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    gap: 2px;
+  }
+  .device-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12.5px; font-weight: 500;
+    cursor: pointer; border: none;
+    background: transparent; color: var(--text-muted);
+    transition: all .18s;
+  }
+  .device-btn.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
+
+  .jodit-container { border-color: var(--border) !important; border-radius: var(--radius-sm) !important; overflow: hidden; }
+  .jodit-toolbar__box { background: #fafbff !important; border-bottom-color: var(--border) !important; }
+
+  .vars-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+    padding: 8px 18px;
+    background: #fffbf2;
+    border-top: 1px solid #fdedc8;
+    border-bottom: 1px solid #fdedc8;
+  }
+  .vars-label { font-weight: 600; color: #a05c00; text-transform: uppercase; font-size: 10.5px; letter-spacing: .5px; }
+  .var-pill {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    background: #fff3d6; border: 1px solid #ffd98a;
+    border-radius: 4px;
+    color: #a05c00; font-size: 11.5px; font-weight: 500;
+    font-family: 'Courier New', monospace;
+    cursor: pointer; transition: all .15s; user-select: none;
+  }
+  .var-pill:hover { background: #ffe9a0; transform: scale(1.04); }
+
+  .form-check-input:checked { background-color: var(--primary) !important; border-color: var(--primary) !important; }
+  .form-check-input:focus { box-shadow: 0 0 0 3px rgba(67,97,238,.15) !important; }
+  .form-check-label { font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; }
+
+  .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  .content-label-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbff;
+  }
+
+  .pg-toast {
+    position: fixed; bottom: 24px; right: 24px;
+    min-width: 240px; padding: 12px 18px;
+    border-radius: var(--radius); color: #fff;
+    font-size: 13.5px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: var(--shadow);
+    transform: translateY(70px); opacity: 0;
+    transition: all .3s cubic-bezier(.175,.885,.32,1.275);
+    z-index: 9999; pointer-events: none;
+  }
+  .pg-toast.show { transform: translateY(0); opacity: 1; }
+
+  @keyframes pg-spin { to { transform: rotate(360deg); } }
+  .spin { animation: pg-spin .7s linear infinite; display: inline-block; }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,18,40,.45);
+    backdrop-filter: blur(3px);
+    z-index: 9000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .22s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    width: 100%;
+    max-width: 500px;
+    margin: 16px;
+    transform: translateY(24px) scale(.97);
+    transition: transform .25s cubic-bezier(.175,.885,.32,1.275);
+    overflow: hidden;
+  }
+  .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbff;
+  }
+  .modal-head-title {
+    font-size: 14.5px; font-weight: 700; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .modal-close {
+    width: 28px; height: 28px;
+    border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 16px;
+    transition: all .15s;
+  }
+  .modal-close:hover { background: #fff0f0; color: var(--danger); border-color: #ffb3b3; }
+
+  .modal-body { padding: 20px; }
+
+  .modal-hint {
+    font-size: 12.5px; color: var(--text-muted);
+    background: #fffbf2; border: 1px solid #fdedc8;
+    border-radius: var(--radius-sm); padding: 9px 14px;
+    margin-bottom: 18px; line-height: 1.6;
+  }
+
+  .param-row {
+    display: grid; grid-template-columns: 110px 1fr;
+    align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  .param-label {
+    font-family: 'Courier New', monospace;
+    font-size: 12px; font-weight: 600;
+    color: #a05c00;
+    background: #fff3d6; border: 1px solid #ffd98a;
+    border-radius: 4px; padding: 3px 8px;
+    text-align: center;
+  }
+
+  .modal-foot {
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: #fafbff;
+  }
+
+  .btn-pg-outline:disabled {
+    opacity: .45; cursor: not-allowed; pointer-events: none;
+  }
+
+  .provider-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+  .provider-chip { cursor: pointer; user-select: none; }
+  .provider-chip input[type=checkbox] { display: none; }
+  .provider-chip-inner {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px; font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface);
+    transition: all .15s;
+  }
+  .provider-chip input:checked + .provider-chip-inner {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .provider-chip-inner:hover { border-color: var(--primary); color: var(--primary); }
+  .provider-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 7px;
+    background: var(--primary-light); color: var(--primary);
+    border: 1px solid #c8d0fa; border-radius: 20px;
+    font-size: 11px; font-weight: 600; margin-left: 4px;
+  }
+  .provider-all-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 1px 7px;
+    background: #e6faf8; color: #0a7a50;
+    border: 1px solid #a0dfc3; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .provider-hint {
+    font-size: 11.5px; color: var(--text-muted);
+    line-height: 1.6; margin-bottom: 10px;
+  }
+</style>
+
+<div class="container-fluid mt-3 px-3 px-md-4 pt-4">
+  <div class="page-header mb-0 shadow-sm">
+    <div class="d-flex align-items-center gap-2" style="flex:1; margin-right:16px;">
+      <label class="form-label mb-0" style="white-space:nowrap; min-width:fit-content;">Template Title <span class="text-danger">*</span></label>
+      <input id="templateTitle" class="form-control" placeholder="Enter template title…" style="max-width:320px;">
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn-pg btn-pg-outline" id="testBtn" onclick="openTestModal()" disabled
+              title="Save the template first to enable testing">
+        <i class="bi bi-play-circle"></i> Test It
+      </button>
+      <button class="btn-pg btn-pg-primary" id="saveBtn" onclick="saveTemplate()">
+        <i class="bi bi-check-lg"></i> Save
+      </button>
+    </div>
+  </div>
+
+ <div style="margin-top:20px"></div>
+  <div class="row g-3">
+    <div class="col-lg-8">
+      <div class="pg-card">
+
+        <div class="pg-card-body" style="border-bottom:1px solid var(--border); padding-bottom:14px;">
+          <label class="form-label">Subject <span class="text-danger">*</span></label>
+          <input id="subject" class="form-control" value="Contact Us: {{title}}" placeholder="Enter subject…">
+        </div>
+
+        <div class="vars-bar">
+          <span class="vars-label"><i class="bi bi-braces me-1"></i>Insert Variable:</span>
+          <span class="var-pill" onclick="insertVar('{{name}}')">{{name}}</span>
+          <span class="var-pill" onclick="insertVar('{{email}}')">{{email}}</span>
+          <span class="var-pill" onclick="insertVar('{{title}}')">{{title}}</span>
+          <span class="var-pill" onclick="insertVar('{{time}}')">{{time}}</span>
+          <span class="var-pill" onclick="insertVar('{{message}}')">{{message}}</span>
+        </div>
+        <div class="content-label-row">
+          <label class="form-label mb-0">Content <span class="text-danger">*</span></label>
+          <div class="device-toggle">
+            <button class="device-btn active" id="desktopBtn" onclick="setDevice('desktop')">
+              <i class="bi bi-display"></i> Desktop
+            </button>
+            <button class="device-btn" id="mobileBtn" onclick="setDevice('mobile')">
+              <i class="bi bi-phone"></i> Mobile
+            </button>
+          </div>
+        </div>
+        <div class="pg-card-body" id="editorWrap">
+          <textarea id="editor"></textarea>
+        </div>
+
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="pg-card">
+
+        <div class="pg-card-header">
+          <i class="bi bi-envelope-at"></i> Email Settings
+        </div>
+
+        <div class="pg-card-body">
+
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-folder2 me-1"></i> Project
+            </label>
+            <select id="projectId" class="form-control" onchange="onProjectChange(this)">
+              <option value="">— No Project —</option>
+            </select>
+            <div id="projectDomainHint" style="display:none;font-size:11.5px;margin-top:5px;padding:6px 10px;border-radius:6px;background:#eef0fd;color:var(--primary);border:1px solid #c8d0fa;">
+              <i class="bi bi-globe2 me-1"></i>
+              <span id="projectDomainText"></span>
+            </div>
+          </div>
+
+          <hr class="sidebar-divider">
+
+          <div class="mb-3">
+            <label class="form-label">To Email <span class="text-danger">*</span></label>
+            <div class="tag-input-box" id="toEmailsBox" onclick="focusTagInput('toEmailsInput')">
+              <div class="tag-chip" data-field="toEmails">
+                <span>rajnish.dynamicssquare@gmail.com</span>
+                <button class="tag-chip-x" onclick="removeTag(this)" type="button">&times;</button>
+              </div>
+              <input class="tag-real-input" id="toEmailsInput" placeholder="Add email, press Enter…"
+                     onkeydown="handleTagKey(event,'toEmails')" onblur="handleTagBlur(event,'toEmails')">
+            </div>
+            <input type="hidden" id="toEmails">
+          </div>
+
+          <hr class="sidebar-divider">
+          <div class="mb-3">
+            <label class="form-label">From Name</label>
+            <input id="fromName" class="form-control" value="{{name}}" placeholder="e.g. {{name}}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">From Email <span class="text-danger">*</span></label>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="useDefaultEmail" checked onchange="toggleFromEmail(this)">
+              <label class="form-check-label" for="useDefaultEmail">
+                Use Default Email Address
+                <i class="bi bi-info-circle text-muted ms-1" title="Uses your account default sender" style="cursor:help"></i>
+              </label>
+            </div>
+            <input id="fromEmail" class="form-control" placeholder="Enter from email…" disabled>
+          </div>
+
+          <hr class="sidebar-divider">
+
+          <div class="mb-3">
+            <label class="form-label">Reply To</label>
+            <input id="replyTo" class="form-control" value="{{email}}" placeholder="e.g. {{email}}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Bcc</label>
+            <div class="tag-input-box" id="bccEmailsBox" onclick="focusTagInput('bccEmailsInput')">
+              <input class="tag-real-input" id="bccEmailsInput" placeholder="Add BCC email, press Enter…"
+                     onkeydown="handleTagKey(event,'bccEmails')" onblur="handleTagBlur(event,'bccEmails')">
+            </div>
+            <input type="hidden" id="bccEmails">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Cc</label>
+            <div class="tag-input-box" id="ccEmailsBox" onclick="focusTagInput('ccEmailsInput')">
+              <input class="tag-real-input" id="ccEmailsInput" placeholder="Add CC email, press Enter…"
+                     onkeydown="handleTagKey(event,'ccEmails')" onblur="handleTagBlur(event,'ccEmails')">
+            </div>
+            <input type="hidden" id="ccEmails">
+          </div>
+
+          <hr class="sidebar-divider">
+
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="bi bi-funnel me-1"></i> Allowed Email Providers
+            </label>
+            <p class="provider-hint">
+              Restrict which email providers can submit this form.
+              <strong>Leave all unchecked</strong> to allow everyone.
+            </p>
+
+            <div class="provider-grid">
+
+              <label class="provider-chip">
+                <input type="checkbox" class="provider-check" value="gmail" onchange="syncProviders()">
+                <span class="provider-chip-inner">
+                  <i class="bi bi-google" style="color:#ea4335;font-size:13px;"></i> Gmail
+                </span>
+              </label>
+
+              <label class="provider-chip">
+                <input type="checkbox" class="provider-check" value="outlook" onchange="syncProviders()">
+                <span class="provider-chip-inner">
+                  <i class="bi bi-microsoft" style="color:#0078d4;font-size:13px;"></i> Outlook
+                </span>
+              </label>
+
+              <label class="provider-chip">
+                <input type="checkbox" class="provider-check" value="yahoo" onchange="syncProviders()">
+                <span class="provider-chip-inner">
+                  <i class="bi bi-envelope-fill" style="color:#6001d2;font-size:13px;"></i> Yahoo
+                </span>
+              </label>
+
+              <label class="provider-chip">
+                <input type="checkbox" class="provider-check" value="icloud" onchange="syncProviders()">
+                <span class="provider-chip-inner">
+                  <i class="bi bi-apple" style="color:#555;font-size:13px;"></i> iCloud
+                </span>
+              </label>
+
+              <label class="provider-chip" style="grid-column:span 2;">
+                <input type="checkbox" class="provider-check" value="custom" onchange="syncProviders()">
+                <span class="provider-chip-inner">
+                  <i class="bi bi-building" style="font-size:13px;"></i> Custom / Business
+                </span>
+              </label>
+
+            </div>
+            <div id="providerSummary" style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+              <span class="provider-all-badge"><i class="bi bi-check-circle"></i> All providers allowed</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Sender Email Field Name</label>
+            <input id="senderEmailField" class="form-control"
+                   value="email" placeholder="email"
+                   style="font-family:'Courier New',monospace;font-size:13px;">
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:5px;line-height:1.5;">
+              The <code>name=""</code> of the email input in your HTML form. Default: <code>email</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-overlay" id="testModalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box" id="testModalBox">
+
+    <div class="modal-head">
+      <div class="modal-head-title">
+        <i class="bi bi-send" style="color:var(--primary)"></i>
+        Test Email — Fill Placeholder Values
+      </div>
+      <button class="modal-close" onclick="closeTestModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-hint">
+        <i class="bi bi-info-circle me-1" style="color:#a05c00"></i>
+        Enter sample values for each <code>{{variable}}</code> used in your template.
+        A test email will be sent to the <strong>To Email</strong> addresses you configured.
+      </div>
+
+      <div id="paramFields"></div>
+
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-pg btn-pg-ghost" onclick="closeTestModal()">Cancel</button>
+      <button class="btn-pg btn-pg-primary" id="sendTestBtn" onclick="sendTestEmail()">
+        <i class="bi bi-send"></i> Send Test Email
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="pg-toast" id="pgToast">
+  <span id="pgToastIcon">✓</span>
+  <span id="pgToastMsg">Template saved!</span>
+</div>
+
+<script>
+let editor;
+
+window.addEventListener("DOMContentLoaded", () => {
+  editor = new Jodit('#editor', {
+    height: 420,
+    toolbarAdaptive: false,
+    buttons: [
+      'bold','italic','underline','strikethrough','|',
+      'ul','ol','|','font','fontsize','paragraph','|',
+      'align','|','image','link','|','undo','redo','|','source'
+    ]
+  });
+
+});
+
+function toggleFromEmail(checkbox) {
+  const input = document.getElementById('fromEmail');
+  input.disabled = checkbox.checked;
+  if (!checkbox.checked) input.focus();
+  else input.value = '';
+}
+
+function setDevice(device) {
+  const wrap = document.getElementById('editorWrap');
+  const dBtn = document.getElementById('desktopBtn');
+  const mBtn = document.getElementById('mobileBtn');
+  if (device === 'mobile') {
+    wrap.style.maxWidth = '375px';
+    wrap.style.margin = '0 auto';
+    mBtn.classList.add('active');
+    dBtn.classList.remove('active');
+  } else {
+    wrap.style.maxWidth = '';
+    wrap.style.margin = '';
+    dBtn.classList.add('active');
+    mBtn.classList.remove('active');
+  }
+}
+
+function insertVar(variable) {
+  if (editor) {
+    editor.selection.insertHTML(
+      `<span style="background:#fff3d6;border:1px solid #ffd98a;border-radius:4px;padding:1px 7px;color:#a05c00;font-family:monospace;font-size:12px;">${variable}</span>`
+    );
+    showToast('✓', `Inserted ${variable}`, '#4361ee');
+  }
+}
+
+async function saveTemplate() {
+  const title     = document.getElementById("templateTitle").value.trim();
+  const subject   = document.getElementById("subject").value.trim();
+  const project   = document.getElementById("projectId").value;
+  const fromName  = document.getElementById("fromName").value.trim();
+  const fromEmail = document.getElementById("fromEmail").value.trim();
+  const replyTo   = document.getElementById("replyTo").value.trim();
+
+  const to  = getTagValues('toEmails');
+  const cc  = getTagValues('ccEmails');
+  const bcc = getTagValues('bccEmails');
+  const html = editor.value;
+
+  if (!title) {
+    showToast('⚠', 'Template title is required.', '#e63946');
+    document.getElementById('templateTitle').focus();
+    return;
+  }
+  if (!subject) {
+    showToast('⚠', 'Subject is required.', '#e63946');
+    document.getElementById('subject').focus();
+    return;
+  }
+  if (!to.length) {
+    showToast('⚠', '"To Email" is required.', '#e63946');
+    return;
+  }
+
+  if(!project){
+    showToast('⚠', 'Please select Project', '#e63946');
+    return;
+  }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">↻</span> Saving…`;
+
+  const allowedProviders = getSelectedProviders();
+  const senderEmailField = document.getElementById('senderEmailField').value.trim() || 'email';
+
+  try {
+    const res  = await fetch("/templates/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, subject, fromName, fromEmail, replyTo, to, cc, bcc, html, allowedProviders, senderEmailField, projectId: document.getElementById('projectId').value || null })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      
+      savedTemplateId = data.data._id;
+      const testBtn = document.getElementById('testBtn');
+      testBtn.disabled = false;
+      testBtn.title = 'Send a test email for this template';
+
+      showToast('✓', 'Template saved! You can now test it.', '#2ec4b6');
+
+    } else {
+      showToast('✕', data.message || 'Save failed.', '#e63946');
+    }
+  } catch (err) {
+    showToast('✕', 'Save failed. Please try again.', '#e63946');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-check-lg"></i> Save`;
+  }
+}
+
+let savedTemplateId = null;
+
+function detectPlaceholders() {
+  const subject = document.getElementById('subject').value || '';
+  const html    = editor ? editor.value : '';
+  const combined = subject + ' ' + html;
+  const regex  = /\{\{\s*(\w+)\s*\}\}/g;
+  const found  = new Set();
+  let match;
+  while ((match = regex.exec(combined)) !== null) {
+    found.add(match[1]);
+  }
+  return Array.from(found);
+}
+
+function openTestModal() {
+  if (!savedTemplateId) {
+    showToast('⚠', 'Please save the template first.', '#e63946');
+    return;
+  }
+
+  const placeholders = detectPlaceholders();
+  const container    = document.getElementById('paramFields');
+
+  if (!placeholders.length) {
+    container.innerHTML = `<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:10px 0;">
+      No <code>{{variables}}</code> detected in this template.<br>
+      The test email will be sent as-is.
+    </p>`;
+  } else {
+    container.innerHTML = placeholders.map(p => `
+      <div class="param-row">
+        <span class="param-label">{{${p}}}</span>
+        <input class="form-control" id="param_${p}"
+               placeholder="Enter value for ${p}…"
+               style="font-size:13px;">
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('testModalOverlay').classList.add('open');
+}
+
+function closeTestModal() {
+  document.getElementById('testModalOverlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+
+  if (e.target === document.getElementById('testModalOverlay')) {
+    closeTestModal();
+  }
+}
+
+async function sendTestEmail() {
+  if (!savedTemplateId) return;
+
+  const placeholders = detectPlaceholders();
+  const data = {};
+  placeholders.forEach(p => {
+    const el = document.getElementById('param_' + p);
+    if (el) data[p] = el.value.trim();
+  });
+
+  const btn = document.getElementById('sendTestBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin">↻</span> Sending…`;
+
+  try {
+    const res  = await fetch(`/templates/send/${savedTemplateId}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ data }),
+    });
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      closeTestModal();
+      showToast('✓', 'Test email sent successfully!', '#2ec4b6');
+    } else {
+      showToast('✕', result.message || 'Failed to send test email.', '#e63946');
+    }
+  } catch (err) {
+    showToast('✕', 'Something went wrong. Try again.', '#e63946');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="bi bi-send"></i> Send Test Email`;
+  }
+}
+
+let toastTimer;
+function showToast(icon, msg, bg) {
+  const t = document.getElementById('pgToast');
+  document.getElementById('pgToastIcon').textContent = icon;
+  document.getElementById('pgToastMsg').textContent  = msg;
+  t.style.background = bg || '#1e2030';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function isValidEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+}
+
+function focusTagInput(inputId) {
+  document.getElementById(inputId).focus();
+}
+
+function handleTagKey(e, field) {
+  
+  if (['Enter','Tab',','].includes(e.key)) {
+    e.preventDefault();
+    commitTag(e.target, field);
+  }
+ 
+  if (e.key === 'Backspace' && e.target.value === '') {
+    const box = document.getElementById(field + 'Box');
+    const chips = box.querySelectorAll('.tag-chip');
+    if (chips.length) chips[chips.length - 1].remove();
+  }
+}
+
+function handleTagBlur(e, field) {
+  if (e.target.value.trim()) commitTag(e.target, field);
+}
+
+function commitTag(input, field) {
+  const val = input.value.replace(/,/g, '').trim();
+  if (!val) return;
+  const box = document.getElementById(field + 'Box');
+  const valid = isValidEmail(val);
+  const chip = document.createElement('div');
+  chip.className = 'tag-chip' + (valid ? '' : ' invalid');
+  chip.innerHTML = '<span>' + escapeHtml(val) + '</span>'
+    + '<button class="tag-chip-x" onclick="removeTag(this)" type="button">&times;</button>';
+  box.insertBefore(chip, input);
+  input.value = '';
+ 
+  if (!valid) {
+    setTimeout(() => { if (chip.parentNode) chip.remove(); }, 1200);
+  }
+}
+
+function removeTag(btn) {
+  btn.closest('.tag-chip').remove();
+}
+
+function getTagValues(field) {
+  const box = document.getElementById(field + 'Box');
+  if (!box) return [];
+  return Array.from(box.querySelectorAll('.tag-chip:not(.invalid) span'))
+              .map(s => s.textContent.trim())
+              .filter(Boolean);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getSelectedProviders() {
+  return Array.from(document.querySelectorAll('.provider-check:checked'))
+              .map(cb => cb.value);
+}
+
+function syncProviders() {
+  const selected = getSelectedProviders();
+  const summary  = document.getElementById('providerSummary');
+  const labels   = {
+    gmail:   '<i class="bi bi-google" style="color:#ea4335"></i> Gmail',
+    outlook: '<i class="bi bi-microsoft" style="color:#0078d4"></i> Outlook',
+    yahoo:   '<i class="bi bi-envelope-fill" style="color:#6001d2"></i> Yahoo',
+    icloud:  '<i class="bi bi-apple" style="color:#555"></i> iCloud',
+    custom:  '<i class="bi bi-building"></i> Custom',
+  };
+
+  if (selected.length === 0) {
+    summary.innerHTML = '<span class="provider-all-badge"><i class="bi bi-check-circle"></i> All providers allowed</span>';
+  } else {
+    const clearBtn = '<button type="button" onclick="clearProviders()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer;margin-left:4px;padding:0;">✕ Clear</button>';
+    summary.innerHTML = selected.map(p =>
+      `<span class="provider-badge">${labels[p] || p}</span>`
+    ).join('') + clearBtn;
+  }
+}
+
+function clearProviders() {
+  document.querySelectorAll('.provider-check').forEach(cb => cb.checked = false);
+  syncProviders();
+}
+
+(async function loadProjects() {
+  try {
+    const res  = await fetch('/projects/list', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success) return;
+    const sel = document.getElementById('projectId');
+    data.data.forEach(p => {
+      const opt     = document.createElement('option');
+      opt.value     = p._id;
+      opt.textContent = p.name + (p.domain ? ' (' + p.domain + ')' : '');
+      opt.dataset.domain       = p.domain       || '';
+      opt.dataset.domainFilter = p.domainFilter  || 'none';
+      sel.appendChild(opt);
+    });
+  } catch {}
+})();
+
+function onProjectChange(sel) {
+  const opt    = sel.selectedOptions[0];
+  const domain = opt?.dataset?.domain       || '';
+  const filter = opt?.dataset?.domainFilter || 'none';
+  const hint   = document.getElementById('projectDomainHint');
+  const txt    = document.getElementById('projectDomainText');
+
+  if (domain && filter !== 'none') {
+    const filterLabel = filter === 'match'
+      ? 'Only @' + domain + ' emails can submit this form'
+      : '@' + domain + ' emails are blocked from submitting';
+    txt.textContent       = filterLabel;
+    hint.style.display    = 'block';
+    hint.style.background = filter === 'match' ? '#eef0fd' : '#fff0f2';
+    hint.style.color      = filter === 'match' ? 'var(--primary)' : 'var(--danger)';
+    hint.style.borderColor= filter === 'match' ? '#c8d0fa' : '#ffd0d8';
+  } else {
+    hint.style.display = 'none';
+  }
+}
+</script>
+
+<%- include('../layouts/footer') %>

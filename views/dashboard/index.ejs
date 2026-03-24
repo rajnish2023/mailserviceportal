@@ -1,0 +1,529 @@
+<%- include('../layouts/header', { title: 'Dashboard' }) %>
+<%- include('../layouts/sidebar', { title: 'Dashboard' }) %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+  :root {
+    --primary:#4361ee;--primary-light:#eef0fd;--primary-hover:#3451d1;
+    --success:#2ec4b6;--success-light:#e6faf8;
+    --warning:#f4a522;--warning-light:#fff8ec;
+    --danger:#e63946;--danger-light:#fff0f1;
+    --purple:#7c3aed;--purple-light:#f3eeff;
+    --bg:#f0f2f9;--surface:#ffffff;--border:#e2e5f0;
+    --text:#1a1d2e;--text-muted:#6b7194;
+    --radius:12px;--radius-sm:8px;
+    --shadow-sm:0 1px 4px rgba(0,0,0,.05);
+    --shadow:0 4px 20px rgba(0,0,0,.08);
+    --font:'Plus Jakarta Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);}
+  .dash-wrap{padding:28px 32px 40px;max-width:1400px;}
+ 
+  .welcome-banner{background:linear-gradient(135deg,#4361ee 0%,#3a0ca3 100%);border-radius:var(--radius);padding:28px 32px;display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative;margin-bottom:28px;box-shadow:0 8px 32px rgba(67,97,238,.3);}
+  .welcome-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07);}
+  .welcome-banner::after{content:'';position:absolute;bottom:-60px;right:120px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.05);}
+  .welcome-text{position:relative;z-index:1;}
+  .welcome-greeting{font-size:12px;font-weight:600;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .welcome-name{font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:8px;}
+  .welcome-sub{font-size:13px;color:rgba(255,255,255,.7);}
+  .welcome-actions{display:flex;gap:10px;position:relative;z-index:1;flex-shrink:0;}
+  .btn-banner{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;transition:all .18s;}
+  .btn-banner-white{background:#fff;color:var(--primary);box-shadow:0 2px 12px rgba(0,0,0,.15);}
+  .btn-banner-white:hover{background:#f0f2ff;color:var(--primary);transform:translateY(-1px);}
+  .btn-banner-ghost{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);}
+  .btn-banner-ghost:hover{background:rgba(255,255,255,.25);color:#fff;}
+ 
+  .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+ 
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;display:flex;align-items:flex-start;gap:14px;box-shadow:var(--shadow-sm);transition:all .2s;position:relative;overflow:hidden;animation:fadeSlideUp .4s ease both;}
+  .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:transparent;}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+  .stat-card.blue::before{background:var(--primary);}
+  .stat-card.teal::before{background:var(--success);}
+  .stat-card.amber::before{background:var(--warning);}
+  .stat-card.violet::before{background:var(--purple);}
+  .stat-card.rose::before{background:var(--danger);}
+  .stat-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+  .stat-icon.blue{background:var(--primary-light);color:var(--primary);}
+  .stat-icon.teal{background:var(--success-light);color:var(--success);}
+  .stat-icon.amber{background:var(--warning-light);color:var(--warning);}
+  .stat-icon.violet{background:var(--purple-light);color:var(--purple);}
+  .stat-icon.rose{background:var(--danger-light);color:var(--danger);}
+  .stat-body{flex:1;min-width:0;}
+  .stat-label{font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+  .stat-value{font-size:1.9rem;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1;margin-bottom:7px;}
+  .stat-trend{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .stat-trend.up{background:var(--success-light);color:#0a7a50;}
+  .stat-trend.info{background:var(--primary-light);color:var(--primary);}
+  .stat-trend.warn{background:var(--warning-light);color:#a06000;}
+  .stat-trend.down{background:var(--danger-light);color:var(--danger);}
+ 
+  .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;animation:fadeSlideUp .5s ease both;}
+  .dash-card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:#fafbff;}
+  .dash-card-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .dash-card-link{font-size:12px;color:var(--primary);text-decoration:none;font-weight:600;}
+  .dash-card-link:hover{text-decoration:underline;}
+  .dash-card-body{padding:20px;}
+  .chart-wrap{position:relative;height:200px;}
+ 
+  .log-table{width:100%;border-collapse:collapse;}
+  .log-table th{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;padding:10px 16px;border-bottom:1px solid var(--border);background:#fafbff;text-align:left;}
+  .log-table td{padding:11px 16px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle;}
+  .log-table tr:last-child td{border-bottom:none;}
+  .log-table tr:hover td{background:#fafbff;}
+  .status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+  .status-sent{background:var(--success-light);color:#0a7a50;}
+  .status-failed{background:var(--danger-light);color:var(--danger);}
+  .trigger-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'Courier New',monospace;}
+  .trigger-form{background:#eef0fd;color:var(--primary);}
+  .trigger-dashboard{background:#fff8ec;color:#a06000;}
+  .trigger-api{background:#f3eeff;color:var(--purple);}
+ 
+  .tpl-bar-row{margin-bottom:14px;}
+  .tpl-bar-row:last-child{margin-bottom:0;}
+  .tpl-bar-meta{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12.5px;}
+  .tpl-bar-name{font-weight:600;color:var(--text);}
+  .tpl-bar-count{color:var(--text-muted);font-size:12px;}
+  .tpl-bar-track{height:6px;background:var(--bg);border-radius:10px;overflow:hidden;}
+  .tpl-bar-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--primary),#7c3aed);transition:width .6s ease;}
+ 
+  .donut-legend{display:flex;flex-direction:column;gap:10px;}
+  .donut-legend-item{display:flex;align-items:center;gap:10px;font-size:13px;}
+  .donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+  @keyframes fadeSlideUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  .stat-card:nth-child(1){animation-delay:.04s;}
+  .stat-card:nth-child(2){animation-delay:.08s;}
+  .stat-card:nth-child(3){animation-delay:.12s;}
+  .stat-card:nth-child(4){animation-delay:.16s;}
+  .stat-card:nth-child(5){animation-delay:.20s;}
+
+  @media(max-width:768px){
+    .dash-wrap{padding:16px;}
+    .welcome-banner{flex-direction:column;gap:20px;align-items:flex-start;}
+    .welcome-name{font-size:1.4rem;}
+    .welcome-actions{flex-wrap:wrap;}
+  }
+   
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(15,18,40,.52);
+    backdrop-filter:blur(4px);
+    z-index:9100;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;
+    transition:opacity .22s;
+  }
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal-box{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow:0 24px 64px rgba(0,0,0,.18);
+    width:100%;max-width:600px;
+    margin:16px;
+    max-height:88vh;
+    overflow-y:auto;
+    transform:translateY(22px) scale(.97);
+    transition:transform .26s cubic-bezier(.175,.885,.32,1.275);
+  }
+  .modal-overlay.open .modal-box{transform:translateY(0) scale(1);}
+
+  .modal-hdr{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:15px 20px;
+    border-bottom:1px solid var(--border);
+    background:#fafbff;
+    position:sticky;top:0;z-index:1;
+  }
+  .modal-hdr-title{
+    font-size:14px;font-weight:700;color:var(--text);
+    display:flex;align-items:center;gap:8px;
+  }
+  .modal-close{
+    width:28px;height:28px;border-radius:6px;
+    border:1px solid var(--border);background:transparent;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:var(--text-muted);font-size:16px;transition:all .15s;
+  }
+  .modal-close:hover{background:var(--danger-light);color:var(--danger);border-color:#ffb3b3;}
+
+  .modal-body{padding:22px;}
+ 
+  .skel{
+    background:linear-gradient(90deg,var(--bg) 25%,#e8eaf2 50%,var(--bg) 75%);
+    background-size:200% 100%;
+    animation:shimmer 1.4s infinite;
+    border-radius:6px;
+  }
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+ 
+  .detail-grid{display:flex;flex-direction:column;gap:0;}
+  .detail-row{
+    display:grid;grid-template-columns:130px 1fr;
+    gap:8px 14px;
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+    align-items:start;
+  }
+  .detail-row:last-child{border-bottom:none;}
+  .detail-key{
+    font-size:11.5px;font-weight:700;
+    color:var(--text-muted);
+    text-transform:uppercase;letter-spacing:.3px;
+    padding-top:2px;
+  }
+  .detail-val{font-size:13.5px;color:var(--text);line-height:1.5;}
+  .detail-divider{
+    margin:16px 0;border:none;
+    border-top:1px dashed var(--border);
+  }
+  .formdata-box{
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+    font-family:'Courier New',monospace;
+    font-size:12.5px;color:var(--text);
+    white-space:pre-wrap;word-break:break-all;
+    max-height:180px;overflow-y:auto;
+    line-height:1.7;
+  }
+  .modal-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 20px;
+    border-top:1px solid var(--border);
+    background:#fafbff;
+  }
+  .modal-foot-link{
+    font-size:12.5px;color:var(--primary);
+    font-weight:600;text-decoration:none;
+    display:flex;align-items:center;gap:5px;
+    transition:color .15s;
+  }
+  .modal-foot-link:hover{color:var(--primary-hover);}
+  .btn-modal-close{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 16px;border-radius:var(--radius-sm);
+    border:1px solid var(--border);background:var(--surface);
+    font-family:var(--font);font-size:13px;font-weight:500;
+    color:var(--text-muted);cursor:pointer;transition:all .15s;
+  }
+  .btn-modal-close:hover{background:var(--bg);color:var(--text);}
+</style>
+
+<div class="dash-wrap">
+  
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <div class="welcome-greeting">
+        <i class="bi bi-sun me-1"></i>
+        Good <%= (new Date().getHours() < 12) ? 'Morning' : (new Date().getHours() < 17) ? 'Afternoon' : 'Evening' %>
+      </div>
+      <div class="welcome-name">Welcome back, <%= user.name %> 👋</div>
+      <div class="welcome-sub">Here's what's happening with your email templates today.</div>
+    </div>
+    <div class="welcome-actions">
+      <a href="/template/new" class="btn-banner btn-banner-white">
+        <i class="bi bi-plus-lg"></i> New Template
+      </a>
+      <a href="/analytics" class="btn-banner btn-banner-ghost">
+        <i class="bi bi-bar-chart-line"></i> Analytics
+      </a>
+    </div>
+  </div>
+ 
+  <div class="section-label">Overview</div>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-xl">
+      <div class="stat-card teal">
+        <div class="stat-icon teal"><i class="bi bi-file-earmark-check"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Templates</div>
+          <div class="stat-value"><%= stats.templates %></div>
+          <span class="stat-trend up"><i class="bi bi-check2-circle"></i> Ready</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-xl">
+      <div class="stat-card amber">
+        <div class="stat-icon amber"><i class="bi bi-send-check"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Total Sent</div>
+          <div class="stat-value"><%= stats.emailsSent || 0 %></div>
+          <span class="stat-trend warn"><i class="bi bi-lightning-charge"></i> All time</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-xl">
+      <div class="stat-card violet">
+        <div class="stat-icon violet"><i class="bi bi-calendar-check"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Sent Today</div>
+          <div class="stat-value" id="statToday">–</div>
+          <span class="stat-trend info"><i class="bi bi-clock"></i> Live</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-xl">
+      <div class="stat-card rose">
+        <div class="stat-icon rose"><i class="bi bi-exclamation-circle"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Failed</div>
+          <div class="stat-value" id="statFailed">–</div>
+          <span class="stat-trend down"><i class="bi bi-x-circle"></i> Errors</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section-label">Recent Email Logs</div>
+  <div class="dash-card mb-4">
+    <div class="dash-card-head">
+      <div class="dash-card-title"><i class="bi bi-clock-history" style="color:var(--success)"></i> Latest Sends</div>
+      <a href="/analytics" class="dash-card-link">View All <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Template</th>
+            <th>Subject</th>
+            <th>Recipient</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Sent At</th>
+          </tr>
+        </thead>
+         <tbody>
+          <% if (recentLogs && recentLogs.length) { %>
+            <% recentLogs.forEach(function(log) { %>
+              <tr onclick="openLogModal('<%= log._id %>')" style="cursor:pointer;">
+                <td style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= log.templateTitle || '—' %></td>
+                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);"><%= log.subject || '—' %></td>
+                <td style="font-size:12.5px;color:var(--text-muted);">
+                  <%= log.to && log.to[0] ? log.to[0] : '—' %>
+                  <% if (log.to && log.to.length > 1) { %><span style="color:var(--primary);font-size:11px;"> +<%= log.to.length-1 %></span><% } %>
+                </td>
+                <td><span class="trigger-pill trigger-<%= log.triggeredBy %>"><%= log.triggeredBy %></span></td>
+                <td>
+                  <span class="status-pill status-<%= log.status %>">
+                    <i class="bi bi-<%= log.status === 'sent' ? 'check-circle' : 'x-circle' %>"></i>
+                    <%= log.status %>
+                  </span>
+                </td>
+                <td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">
+                  <%= new Date(log.createdAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">
+                <i class="bi bi-inbox" style="font-size:28px;opacity:.3;display:block;margin-bottom:8px;"></i>
+                No emails sent yet. <a href="/template/new" style="color:var(--primary);font-weight:600;">Create a template →</a>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+ 
+<div class="modal-overlay" id="logModal" onclick="handleOverlay(event)">
+  <div class="modal-box">
+
+    <div class="modal-hdr">
+      <div class="modal-hdr-title">
+        <i class="bi bi-envelope-open" style="color:var(--primary)"></i>
+        Email Log Detail
+      </div>
+      <button class="modal-close" onclick="closeLogModal()">&#x2715;</button>
+    </div>
+
+    <div class="modal-body" id="modalBody">
+       
+      <div id="modalSkeleton">
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:10px 14px;">
+          <% for(let i=0;i<8;i++) { %>
+            <div class="skel" style="height:14px;width:80px;"></div>
+            <div class="skel" ></div>
+          <% } %>
+        </div>
+      </div>
+      
+      <div id="modalContent" style="display:none;"></div>
+    </div>
+
+    <div class="modal-foot">
+      <a href="#" class="modal-foot-link" id="modalFullLink" target="_blank">
+        <i class="bi bi-box-arrow-up-right"></i> View Full Details
+      </a>
+      <button class="btn-modal-close" onclick="closeLogModal()">
+        <i class="bi bi-x"></i> Close
+      </button>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<script>
+ 
+fetch('/analytics/stats').then(r=>r.json()).then(({data})=>{
+  if(!data) return;
+  document.getElementById('statToday').textContent  = data.today  ?? '–';
+  document.getElementById('statFailed').textContent = data.failed ?? '–';
+}).catch(()=>{});
+
+ 
+function openLogModal(id) {
+  const modal = document.getElementById('logModal');
+ 
+  document.getElementById('modalSkeleton').style.display = '';
+  document.getElementById('modalContent').style.display  = 'none';
+  document.getElementById('modalFullLink').href          = `/analytics/log/${id}`;
+
+  modal.classList.add('open');
+ 
+  fetch(`/analytics/log/${id}/json`, { credentials: 'include' })
+    .then(r => r.json())
+    .then(({ success, log }) => {
+      if (!success || !log) throw new Error('not found');
+      renderModal(log);
+    })
+    .catch(() => {
+      document.getElementById('modalSkeleton').style.display = 'none';
+      document.getElementById('modalContent').style.display  = '';
+      document.getElementById('modalContent').innerHTML =
+        `<div style="text-align:center;padding:32px;color:var(--text-muted);">
+           <i class="bi bi-exclamation-circle" style="font-size:28px;opacity:.4;display:block;margin-bottom:10px;"></i>
+           Failed to load log details.
+         </div>`;
+    });
+}
+
+function closeLogModal() {
+  document.getElementById('logModal').classList.remove('open');
+}
+
+function handleOverlay(e) {
+  if (e.target === document.getElementById('logModal')) closeLogModal();
+}
+ 
+function renderModal(log) {
+  const statusColor = log.status === 'sent'
+    ? { bg: 'var(--success-light)', color: '#0a7a50' }
+    : { bg: 'var(--danger-light)',  color: 'var(--danger)' };
+
+  const triggerColors = {
+    form:      'background:#eef0fd;color:var(--primary)',
+    dashboard: 'background:#fff8ec;color:#a06000',
+    api:       'background:#f3eeff;color:var(--purple)',
+  };
+
+  const fmt = val => val
+    ? `<span style="font-family:'Courier New',monospace;font-size:12px;background:var(--bg);padding:2px 7px;border-radius:4px;border:1px solid var(--border);">${val}</span>`
+    : '<span style="color:var(--text-muted)">—</span>';
+
+  const toList = (arr) => arr?.length
+    ? arr.join('<span style="color:var(--border);margin:0 5px;">•</span>')
+    : '—';
+
+  const sentAt = new Date(log.createdAt).toLocaleString('en-US', {
+    weekday:'short', month:'short', day:'numeric',
+    year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+
+  document.getElementById('modalContent').innerHTML = `
+    <div class="detail-grid">
+
+      <div class="detail-row">
+        <span class="detail-key">Status</span>
+        <span class="detail-val">
+          <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:${statusColor.bg};color:${statusColor.color};">
+            <i class="bi bi-${log.status === 'sent' ? 'check-circle' : 'x-circle'}"></i>
+            ${log.status}
+          </span>
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Template</span>
+        <span class="detail-val" style="font-weight:600;">${log.templateTitle || '—'}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Subject</span>
+        <span class="detail-val">${log.subject || '—'}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">From</span>
+        <span class="detail-val" style="font-size:13px;">${log.fromAddress || '—'}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">To</span>
+        <span class="detail-val" style="font-size:13px;">${toList(log.to)}</span>
+      </div>
+
+      ${log.cc?.length ? `
+      <div class="detail-row">
+        <span class="detail-key">CC</span>
+        <span class="detail-val" style="font-size:13px;">${toList(log.cc)}</span>
+      </div>` : ''}
+
+      <div class="detail-row">
+        <span class="detail-key">Source</span>
+        <span class="detail-val">
+          <span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:4px;font-size:11.5px;font-weight:600;font-family:'Courier New',monospace;${triggerColors[log.triggeredBy] || ''}">
+            ${log.triggeredBy}
+          </span>
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Message ID</span>
+        <span class="detail-val">${fmt(log.messageId)}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Sent At</span>
+        <span class="detail-val">${sentAt}</span>
+      </div>
+
+      ${log.errorMessage ? `
+      <div class="detail-row">
+        <span class="detail-key">Error</span>
+        <span class="detail-val" style="color:var(--danger);font-size:13px;">${log.errorMessage}</span>
+      </div>` : ''}
+
+    </div>
+
+    <hr class="detail-divider">
+
+    <div style="font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;">
+      <i class="bi bi-braces me-1"></i> Submitted Form Data
+    </div>
+    <div class="formdata-box">${JSON.stringify(log.formData || {}, null, 2)}</div>
+  `;
+
+  document.getElementById('modalSkeleton').style.display = 'none';
+  document.getElementById('modalContent').style.display  = '';
+}
+ 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLogModal();
+});
+</script>
+
+<%- include('../layouts/footer') %>
+
+

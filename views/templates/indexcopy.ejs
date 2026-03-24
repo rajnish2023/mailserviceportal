@@ -1,0 +1,380 @@
+<%- include('../layouts/header', { title: 'Templates' }) %>
+<%- include('../layouts/sidebar') %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<style>
+  :root {
+    --primary:       #4361ee;
+    --primary-light: #eef0fd;
+    --danger:        #e63946;
+    --bg:            #f4f5fb;
+    --surface:       #ffffff;
+    --border:        #e2e5f0;
+    --text:          #1e2030;
+    --text-muted:    #6b7194;
+    --radius:        10px;
+    --radius-sm:     7px;
+    --shadow-sm:     0 1px 4px rgba(0,0,0,.06);
+    --shadow:        0 4px 20px rgba(0,0,0,.08);
+  }
+
+  body { background: var(--bg); font-size: 14px; }
+ 
+  .pg-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -.4px;
+  }
+ 
+  .btn-create {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .18s;
+    box-shadow: 0 2px 8px rgba(67,97,238,.28);
+  }
+  .btn-create:hover {
+    background: #3451d1;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(67,97,238,.38);
+    transform: translateY(-1px);
+  }
+ 
+  .templates-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+   
+  .template-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .template-row:last-child { border-bottom: none; }
+  .template-row:hover { background: #fafbff; }
+ 
+  .tpl-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    background: var(--primary-light);
+    border: 1px solid #c8d0fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--primary);
+    font-size: 20px;
+  }
+ 
+  .tpl-info { flex: 1; min-width: 0; }
+  .tpl-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tpl-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tpl-meta .meta-label { font-weight: 500; }
+  .tpl-apikey {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 7px;
+  }
+ 
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .status-active   { background: #e6faf5; color: #0a7a50; border: 1px solid #a0dfc3; }
+  .status-inactive { background: #fff0f0; color: #b00020; border: 1px solid #ffb3b3; }
+ 
+  .tpl-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .action-btn {
+    width: 34px; height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all .15s;
+  }
+  .action-btn:hover         { background: var(--primary-light); color: var(--primary); border-color: #c8d0fa; }
+  .action-btn.copy:hover    { background: #e6faf5; color: #0a7a50; border-color: #a0dfc3; }
+  .action-btn.danger:hover  { background: #fff0f0; color: var(--danger); border-color: #ffb3b3; }
+ 
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: .4; display: block; }
+  .empty-state p { font-size: 14px; margin: 0; }
+ 
+  .search-bar {
+    position: relative;
+    max-width: 280px;
+  }
+  .search-bar i {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .search-bar input {
+    padding-left: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    width: 100%;
+    height: 36px;
+    outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .search-bar input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67,97,238,.1);
+  }
+  .search-bar input::placeholder { color: #b4b9ce; }
+</style>
+
+<div class="container-fluid mt-4 px-3 px-md-4">
+ 
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div>AVA
+      <h2 class="pg-title mb-1">Email Templates</h2>
+      <small class="text-muted">Manage and configure your email templates</small>
+    </div>
+    <a href="/template/new" class="btn-create">
+      <i class="bi bi-plus-circle"></i> Create New Template
+    </a>
+  </div>
+ 
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <span class="text-muted" style="font-size:13px;">
+      <% if (templates && templates.length) { %>
+        <strong style="color:var(--text)"><%= templates.length %></strong> template<%= templates.length !== 1 ? 's' : '' %> found
+      <% } %>
+    </span>
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" id="searchInput" placeholder="Search templates…" oninput="filterTemplates()">
+    </div>
+  </div>
+ 
+  <div class="templates-wrapper" id="templatesList">
+
+    <% if (templates && templates.length) { %>
+      <% templates.forEach(function(t) { %>
+        <div class="template-row" data-name="<%= t.title.toLowerCase() %>">
+ 
+          <div class="tpl-icon">
+            <i class="bi bi-file-earmark-check"></i>
+          </div>
+ 
+          <div class="tpl-info">
+            <div class="tpl-name"><%= t.title %></div>
+            <div class="tpl-meta">
+              <span class="meta-label">Template ID:</span>
+              <span class="tpl-apikey"><%= t.apiKey %></span>
+              <span class="status-badge <%= t.isActive ? 'status-active' : 'status-inactive' %>">
+                <i class="bi bi-circle-fill" style="font-size:7px;"></i>
+                <%= t.isActive ? 'Active' : 'Inactive' %>
+              </span>
+            </div>
+          </div>
+ 
+          <div class="tpl-actions">
+ 
+            <a href="/template/edit/<%= t._id %>"
+               class="action-btn" title="Edit Template">
+              <i class="bi bi-pencil"></i>
+            </a>
+ 
+            <button class="action-btn copy" title="Copy API Key"
+                    onclick="copyKey('<%= t.apiKey %>', this)">
+              <i class="bi bi-clipboard"></i>
+            </button>
+ 
+            <button class="action-btn" title="<%= t.isActive ? 'Deactivate' : 'Activate' %>"
+                    onclick="toggleTemplate('<%= t._id %>', this)">
+              <i class="bi bi-<%= t.isActive ? 'toggle-on' : 'toggle-off' %>"></i>
+            </button>
+ 
+            <button class="action-btn danger" title="Delete Template"
+                    onclick="deleteTemplate('<%= t._id %>', this)">
+              <i class="bi bi-trash"></i>
+            </button>
+
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="bi bi-file-earmark-x"></i>
+        <p>No templates found. <a href="/templates/new" style="color:var(--primary)">Create your first one →</a></p>
+      </div>
+    <% } %>
+
+  </div>
+
+</div>
+
+<script>
+const notyf = new Notyf({
+  duration: 2500,
+  position: { x: 'right', y: 'top' },
+  ripple: false
+});
+ 
+function filterTemplates() {
+  const q     = document.getElementById('searchInput').value.toLowerCase().trim();
+  const rows  = document.querySelectorAll('.template-row');
+  let visible = 0;
+
+  rows.forEach(row => {
+    const match = row.dataset.name.includes(q);
+    row.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+ 
+  let noResult = document.getElementById('noSearchResult');
+  if (!visible) {
+    if (!noResult) {
+      noResult = document.createElement('div');
+      noResult.id = 'noSearchResult';
+      noResult.className = 'empty-state';
+      noResult.innerHTML = '<i class="bi bi-search"></i><p>No templates match "<strong>' + q + '</strong>"</p>';
+      document.getElementById('templatesList').appendChild(noResult);
+    }
+  } else if (noResult) {
+    noResult.remove();
+  }
+}
+ 
+function copyKey(key, btn) {
+  navigator.clipboard.writeText(key).then(() => {
+    const icon = btn.querySelector('i');
+    icon.className = 'bi bi-clipboard-check';
+    notyf.success('API key copied!');
+    setTimeout(() => { icon.className = 'bi bi-clipboard'; }, 2000);
+  });
+} 
+
+async function toggleTemplate(id, btn) {
+  try {
+    const res  = await fetch(`/templates/toggle/${id}`, { method: 'PATCH' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const icon = btn.querySelector('i');
+      const row  = btn.closest('.template-row');
+      const badge = row.querySelector('.status-badge');
+
+      if (data.isActive) {
+        icon.className  = 'bi bi-toggle-on';
+        btn.title       = 'Deactivate';
+        badge.className = 'status-badge status-active';
+        badge.innerHTML = '<i class="bi bi-circle-fill" style="font-size:7px;"></i> Active';
+      } else {
+        icon.className  = 'bi bi-toggle-off';
+        btn.title       = 'Activate';
+        badge.className = 'status-badge status-inactive';
+        badge.innerHTML = '<i class="bi bi-circle-fill" style="font-size:7px;"></i> Inactive';
+      }
+      notyf.success(data.message);
+    } else {
+      notyf.error(data.message || 'Failed to toggle template');
+    }
+  } catch {
+    notyf.error('Something went wrong');
+  }
+}
+
+async function deleteTemplate(id, btn) {
+  if (!confirm('Are you sure you want to delete this template? This cannot be undone.')) return;
+  try {
+    const res  = await fetch(`/templates/delete/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const row = btn.closest('.template-row');
+      row.style.transition = 'opacity .3s, transform .3s';
+      row.style.opacity    = '0';
+      row.style.transform  = 'translateX(20px)';
+      setTimeout(() => {
+        row.remove();
+        const remaining = document.querySelectorAll('.template-row');
+        if (!remaining.length) {
+          document.getElementById('templatesList').innerHTML =
+            `<div class="empty-state">
+               <i class="bi bi-file-earmark-x"></i>
+               <p>No templates found. <a href="/templates/new" style="color:var(--primary)">Create your first one →</a></p>
+             </div>`;
+        }
+      }, 300);
+      notyf.success('Template deleted successfully');
+    } else {
+      notyf.error(data.message || 'Failed to delete template');
+    }
+  } catch {
+    notyf.error('Something went wrong');
+  }
+}
+</script>
+
+<%- include('../layouts/footer') %>

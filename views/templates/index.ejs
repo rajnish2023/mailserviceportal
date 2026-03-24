@@ -1,0 +1,795 @@
+<%- include('../layouts/header', { title: 'Templates' }) %>
+<%- include('../layouts/sidebar') %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<style>
+  :root {
+    --primary:       #4361ee;
+    --primary-light: #eef0fd;
+    --danger:        #e63946;
+    --bg:            #f4f5fb;
+    --surface:       #ffffff;
+    --border:        #e2e5f0;
+    --text:          #1e2030;
+    --text-muted:    #6b7194;
+    --radius:        10px;
+    --radius-sm:     7px;
+    --shadow-sm:     0 1px 4px rgba(0,0,0,.06);
+    --shadow:        0 4px 20px rgba(0,0,0,.08);
+  }
+
+  body { background: var(--bg); font-size: 14px; }
+  .pg-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -.4px;
+  }
+
+  .btn-create {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .18s;
+    box-shadow: 0 2px 8px rgba(67,97,238,.28);
+  }
+  .btn-create:hover {
+    background: #3451d1;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(67,97,238,.38);
+    transform: translateY(-1px);
+  }
+
+  .templates-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+
+  .template-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .template-row:last-child { border-bottom: none; }
+  .template-row:hover { background: #fafbff; }
+
+  .tpl-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    background: var(--primary-light);
+    border: 1px solid #c8d0fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--primary);
+    font-size: 20px;
+  }
+
+  .tpl-info { flex: 1; min-width: 0; }
+  .tpl-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tpl-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tpl-meta .meta-label { font-weight: 500; }
+  .tpl-apikey {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 7px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+  .status-active   { background: #e6faf5; color: #0a7a50; border: 1px solid #a0dfc3; }
+  .status-inactive { background: #fff0f0; color: #b00020; border: 1px solid #ffb3b3; }
+  .tpl-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .action-btn {
+    width: 34px; height: 34px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all .15s;
+  }
+  .action-btn:hover         { background: var(--primary-light); color: var(--primary); border-color: #c8d0fa; }
+  .action-btn.copy:hover    { background: #e6faf5; color: #0a7a50; border-color: #a0dfc3; }
+  .action-btn.danger:hover  { background: #fff0f0; color: var(--danger); border-color: #ffb3b3; }
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: .4; display: block; }
+  .empty-state p { font-size: 14px; margin: 0; }
+  .search-bar {
+    position: relative;
+    max-width: 280px;
+  }
+  .search-bar i {
+    position: absolute;
+    left: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .search-bar input {
+    padding-left: 32px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    width: 100%;
+    height: 36px;
+    outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .search-bar input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67,97,238,.1);
+  }
+  .search-bar input::placeholder { color: #b4b9ce; }
+
+  .zoho-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    cursor: pointer; border: none; transition: all .15s;
+  }
+  .zoho-badge.on  { background:#fff0f5; color:#c0392b; border:1px solid #f5a7b8; }
+  .zoho-badge.off { background:var(--bg); color:var(--text-muted); border:1px solid var(--border); }
+  .zoho-badge:hover { opacity:.8; }
+  .modal-overlay {
+    position:fixed; inset:0;
+    background:rgba(15,18,40,.48);
+    backdrop-filter:blur(3px);
+    z-index:9100;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .22s;
+  }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal-box {
+    background:#fff; border-radius:12px;
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    width:100%; max-width:520px; margin:16px;
+    max-height:90vh; overflow-y:auto;
+    transform:translateY(22px) scale(.97);
+    transition:transform .25s cubic-bezier(.175,.885,.32,1.275);
+  }
+  .modal-overlay.open .modal-box { transform:translateY(0) scale(1); }
+  .modal-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    background:#fafbff; position:sticky; top:0; z-index:1;
+  }
+  .modal-head-title { font-size:14.5px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .modal-close {
+    width:28px; height:28px; border-radius:6px;
+    border:1px solid var(--border); background:transparent;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    color:var(--text-muted); font-size:16px; transition:all .15s;
+  }
+  .modal-close:hover { background:#fff0f0; color:#e63946; border-color:#ffb3b3; }
+  .modal-body { padding:22px; }
+  .modal-foot {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; border-top:1px solid var(--border); background:#fafbff;
+  }
+
+  .mform-group { margin-bottom:16px; }
+  .mform-label {
+    display:block; font-size:11.5px; font-weight:700;
+    color:var(--text-muted); text-transform:uppercase;
+    letter-spacing:.4px; margin-bottom:6px;
+  }
+  .mform-control {
+    width:100%; padding:9px 12px;
+    border:1px solid var(--border); border-radius:8px;
+    font-family:'Courier New',monospace; font-size:12.5px;
+    color:var(--text); background:#fff; outline:none;
+    transition:border-color .18s, box-shadow .18s;
+  }
+  .mform-control:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(67,97,238,.1); }
+  .mform-control::placeholder { color:#b4b9ce; font-family:inherit; }
+  .pwd-wrap { position:relative; }
+  .pwd-wrap .mform-control { padding-right:38px; }
+  .pwd-eye {
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    border:none; background:transparent; color:var(--text-muted);
+    cursor:pointer; font-size:14px; padding:0;
+  }
+
+  .sw-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; }
+  .sw-label { font-size:13px; font-weight:600; color:var(--text); }
+  .sw-sub   { font-size:11.5px; color:var(--text-muted); margin-top:2px; }
+  .switch { position:relative; width:42px; height:24px; cursor:pointer; flex-shrink:0; }
+  .switch input { display:none; }
+  .sw-track { position:absolute; inset:0; background:var(--border); border-radius:20px; transition:background .2s; }
+  .switch input:checked + .sw-track { background:#e8274b; }
+  .sw-thumb { position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s; }
+  .switch input:checked ~ .sw-thumb { transform:translateX(18px); }
+
+  .info-hint {
+    background:#fffbf2; border:1px solid #fdedc8;
+    border-radius:8px; padding:10px 14px;
+    font-size:12px; color:#a05c00; line-height:1.6;
+    margin-bottom:16px;
+  }
+
+  .connect-status {
+    display:flex; align-items:center; gap:8px;
+    padding:8px 12px; border-radius:8px; font-size:13px; font-weight:500;
+    margin-top:12px;
+  }
+  .connect-status.success { background:#e6faf8; color:#0a7a50; border:1px solid #a0dfc3; }
+  .connect-status.error   { background:#fff0f0; color:#b00020; border:1px solid #ffb3b3; }
+  .connect-status.hidden  { display:none; }
+
+  .btn-z {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:8px; font-size:13px;
+    font-weight:600; cursor:pointer; border:none; transition:all .18s;
+    font-family:inherit;
+  }
+  .btn-z-ghost   { background:transparent; border:1px solid var(--border); color:var(--text-muted); }
+  .btn-z-ghost:hover { background:var(--bg); color:var(--text); }
+  .btn-z-primary { background:#e8274b; color:#fff; box-shadow:0 2px 8px rgba(232,39,75,.28); }
+  .btn-z-primary:hover { background:#c0212d; }
+  .btn-z-primary:disabled { opacity:.65; cursor:not-allowed; }
+  .btn-z-outline { background:#fff0f5; color:#c0392b; border:1px solid #f5a7b8; }
+  .btn-z-outline:hover { background:#e8274b; color:#fff; }
+
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spin { animation:spin .7s linear infinite; display:inline-block; }
+</style>
+
+<div class="container-fluid mt-4 px-3 px-md-4 pt-4">
+
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+      <h2 class="pg-title mb-1">Email Templates</h2>
+      <small class="text-muted">Manage and configure your email templates</small>
+    </div>
+    <a href="/template/new" class="btn-create">
+      <i class="bi bi-plus-circle"></i> Create New Template
+    </a>
+  </div>
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <span class="text-muted" style="font-size:13px;">
+      <% if (templates && templates.length) { %>
+        <strong style="color:var(--text)"><%= templates.length %></strong> template<%= templates.length !== 1 ? 's' : '' %> found
+      <% } %>
+    </span>
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" id="searchInput" placeholder="Search templates…" oninput="filterTemplates()">
+    </div>
+  </div>
+
+  <div class="templates-wrapper" id="templatesList">
+
+    <% if (templates && templates.length) { %>
+      <% templates.forEach(function(t) { %>
+        <div class="template-row" data-name="<%= t.title.toLowerCase() %>">
+
+          <div class="tpl-icon">
+            <i class="bi bi-file-earmark-check"></i>
+          </div>
+
+          <div class="tpl-info">
+            <div class="tpl-name"><%= t.title %></div>
+            <div class="tpl-meta">
+              <span class="meta-label">Template ID:</span>
+              <span class="tpl-apikey"><%= t.apiKey %></span>
+              <span class="status-badge <%= t.isActive ? 'status-active' : 'status-inactive' %>">
+                <i class="bi bi-circle-fill" style="font-size:7px;"></i>
+                <%= t.isActive ? 'Active' : 'Inactive' %>
+              </span>
+            </div>
+          </div>
+
+          <div class="tpl-actions">
+
+            <button class="zoho-badge <%= t.zohoEnabled ? 'on' : 'off' %>"
+                    title="Zoho CRM Settings"
+                    onclick="openZohoModal('<%= t._id %>','<%= t.title.replace(/'/g,`\'`) %>')"
+                    id="zohoBtn-<%= t._id %>">
+              <svg width="12" height="12" viewBox="0 0 40 40" fill="none">
+                <rect width="40" height="40" rx="6" fill="<%= t.zohoEnabled ? '#e8274b' : '#b0b4c4' %>"/>
+                <text x="7" y="27" font-size="18" font-weight="800" fill="white" font-family="Arial">Z</text>
+              </svg>
+              <%= t.zohoEnabled ? 'Zoho ON' : 'Zoho OFF' %>
+            </button>
+            <a href="/template/edit/<%= t._id %>"
+               class="action-btn" title="Edit Template">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button class="action-btn copy" title="Copy API Key"
+                    onclick="copyKey('<%= t.apiKey %>', this)">
+              <i class="bi bi-clipboard"></i>
+            </button>
+            <button class="action-btn" title="<%= t.isActive ? 'Deactivate' : 'Activate' %>"
+                    onclick="toggleTemplate('<%= t._id %>', this)">
+              <i class="bi bi-<%= t.isActive ? 'toggle-on' : 'toggle-off' %>"></i>
+            </button>
+            <button class="action-btn danger" title="Delete Template"
+                    onclick="deleteTemplate('<%= t._id %>', this)">
+              <i class="bi bi-trash"></i>
+            </button>
+
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state">
+        <i class="bi bi-file-earmark-x"></i>
+        <p>No templates found. <a href="/template/new" style="color:var(--primary)">Create your first one →</a></p>
+      </div>
+    <% } %>
+
+  </div>
+
+</div>
+<div class="modal-overlay" id="zohoModal" onclick="handleZohoOverlay(event)">
+  <div class="modal-box">
+
+    <div class="modal-head">
+      <div class="modal-head-title">
+        <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="6" fill="#e8274b"/>
+          <text x="7" y="27" font-size="18" font-weight="800" fill="white" font-family="Arial">Z</text>
+        </svg>
+        Zoho CRM — <span id="zohoModalTemplateName" style="color:var(--primary);font-weight:800;"></span>
+      </div>
+      <button class="modal-close" onclick="closeZohoModal()">&#x2715;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="sw-row" style="background:var(--bg);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <div>
+          <div class="sw-label">Enable Zoho Lead Capture</div>
+          <div class="sw-sub">Creates a lead in Zoho CRM on every form submission</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="zohoEnabledToggle" onchange="syncZohoToggleUI()">
+          <div class="sw-track"></div>
+          <div class="sw-thumb"></div>
+        </label>
+      </div>
+      <div id="zohoCreds">
+
+        <div class="info-hint">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>One-time setup per client.</strong>
+          Get these from <a href="https://api-console.zoho.com" target="_blank" style="color:#a05c00;font-weight:600;">api-console.zoho.com</a> →
+          Self Client → Scope: <code>ZohoCRM.modules.leads.ALL</code>.
+          The <strong>refresh token never expires</strong> — store it once.
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Client ID <span style="color:#e63946;">*</span></label>
+          <input id="z_clientId" class="mform-control" type="text"
+                 placeholder="1000.XXXXXXXXXXXXXXXXXXXXXXXX">
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Client Secret <span style="color:#e63946;">*</span></label>
+          <div class="pwd-wrap">
+            <input id="z_clientSecret" class="mform-control" type="password"
+                   placeholder="••••••••••••••••••••••••••••••••">
+            <button type="button" class="pwd-eye" onclick="toggleEye('z_clientSecret',this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Refresh Token <span style="color:#e63946;">*</span></label>
+          <div class="pwd-wrap">
+            <input id="z_refreshToken" class="mform-control" type="password"
+                   placeholder="1000.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxx">
+            <button type="button" class="pwd-eye" onclick="toggleEye('z_refreshToken',this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Data Center / Region</label>
+          <select id="z_dataCenter" class="mform-control" style="font-family:inherit;font-size:13px;" onchange="syncDataCenter()">
+            <option value="com">Global — zohoapis.com</option>
+            <option value="eu">Europe — zohoapis.eu</option>
+            <option value="in">India — zohoapis.in</option>
+            <option value="com.au">Australia — zohoapis.com.au</option>
+          </select>
+          <input type="hidden" id="z_apiDomain"    value="https://www.zohoapis.com">
+          <input type="hidden" id="z_accountsUrl"  value="https://accounts.zoho.com">
+        </div>
+
+        <hr style="border-color:var(--border);margin:16px 0;">
+        <div class="mform-group" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <input type="checkbox" id="z_skipDuplicates" checked
+                 style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
+          <label for="z_skipDuplicates" style="font-size:13px;font-weight:500;color:var(--text);cursor:pointer;margin:0;">
+            Skip if lead with same email already exists
+          </label>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Extra Zoho Fields <span style="opacity:.6;font-size:10px;text-transform:none;">(optional)</span></label>
+          <textarea id="z_extraFields" class="mform-control" rows="3"
+                    style="font-family:'Courier New',monospace;resize:vertical;"
+                    placeholder="Lead_Source=Website&#10;Industry=Technology&#10;Lead_Status=Not Contacted"></textarea>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Format: <code>Field=Value</code> one per line</div>
+        </div>
+        <div class="mform-group" style="margin-bottom:0;">
+          <label class="mform-label">Field Mapping <span style="opacity:.6;font-size:10px;text-transform:none;">(optional)</span></label>
+          <textarea id="z_fieldMapping" class="mform-control" rows="3"
+                    style="font-family:'Courier New',monospace;resize:vertical;"
+                    placeholder="full_name=Last_Name&#10;phone_number=Phone&#10;company_name=Company"></textarea>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+            Default: name→Last_Name, email→Email, phone→Phone, company→Company, message→Description
+          </div>
+        </div>
+        <div class="connect-status hidden" id="z_connectStatus">
+          <i class="bi bi-circle-fill" style="font-size:8px;"></i>
+          <span id="z_connectMsg"></span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-z btn-z-outline" id="z_testBtn" onclick="testZohoConn()">
+        <i class="bi bi-plug"></i> Test Connection
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-z btn-z-ghost" onclick="closeZohoModal()">Cancel</button>
+        <button class="btn-z btn-z-primary" id="z_saveBtn" onclick="saveZohoSettings()">
+          <i class="bi bi-check-lg"></i> Save Zoho Settings
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const notyf = new Notyf({
+  duration: 2500,
+  position: { x: 'right', y: 'top' },
+  ripple: false
+});
+function filterTemplates() {
+  const q     = document.getElementById('searchInput').value.toLowerCase().trim();
+  const rows  = document.querySelectorAll('.template-row');
+  let visible = 0;
+
+  rows.forEach(row => {
+    const match = row.dataset.name.includes(q);
+    row.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  let noResult = document.getElementById('noSearchResult');
+  if (!visible) {
+    if (!noResult) {
+      noResult = document.createElement('div');
+      noResult.id = 'noSearchResult';
+      noResult.className = 'empty-state';
+      noResult.innerHTML = '<i class="bi bi-search"></i><p>No templates match "<strong>' + q + '</strong>"</p>';
+      document.getElementById('templatesList').appendChild(noResult);
+    }
+  } else if (noResult) {
+    noResult.remove();
+  }
+}
+
+function copyKey(key, btn) {
+  navigator.clipboard.writeText(key).then(() => {
+    const icon = btn.querySelector('i');
+    icon.className = 'bi bi-clipboard-check';
+    notyf.success('API key copied!');
+    setTimeout(() => { icon.className = 'bi bi-clipboard'; }, 2000);
+  });
+}
+async function toggleTemplate(id, btn) {
+  try {
+    const res  = await fetch(`/templates/toggle/${id}`, { method: 'PATCH' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const icon = btn.querySelector('i');
+      const row  = btn.closest('.template-row');
+      const badge = row.querySelector('.status-badge');
+
+      if (data.isActive) {
+        icon.className  = 'bi bi-toggle-on';
+        btn.title       = 'Deactivate';
+        badge.className = 'status-badge status-active';
+        badge.innerHTML = '<i class="bi bi-circle-fill" style="font-size:7px;"></i> Active';
+      } else {
+        icon.className  = 'bi bi-toggle-off';
+        btn.title       = 'Activate';
+        badge.className = 'status-badge status-inactive';
+        badge.innerHTML = '<i class="bi bi-circle-fill" style="font-size:7px;"></i> Inactive';
+      }
+      notyf.success(data.message);
+    } else {
+      notyf.error(data.message || 'Failed to toggle template');
+    }
+  } catch {
+    notyf.error('Something went wrong');
+  }
+}
+
+async function deleteTemplate(id, btn) {
+  if (!confirm('Are you sure you want to delete this template? This cannot be undone.')) return;
+  try {
+    const res  = await fetch(`/templates/delete/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      const row = btn.closest('.template-row');
+      row.style.transition = 'opacity .3s, transform .3s';
+      row.style.opacity    = '0';
+      row.style.transform  = 'translateX(20px)';
+      setTimeout(() => {
+        row.remove();
+        const remaining = document.querySelectorAll('.template-row');
+        if (!remaining.length) {
+          document.getElementById('templatesList').innerHTML =
+            `<div class="empty-state">
+               <i class="bi bi-file-earmark-x"></i>
+               <p>No templates found. <a href="/template/new" style="color:var(--primary)">Create your first one →</a></p>
+             </div>`;
+        }
+      }, 300);
+      notyf.success('Template deleted successfully');
+    } else {
+      notyf.error(data.message || 'Failed to delete template');
+    }
+  } catch {
+    notyf.error('Something went wrong');
+  }
+}
+
+let currentZohoTemplateId = null;
+
+function openZohoModal(id, title) {
+  currentZohoTemplateId = id;
+  document.getElementById('zohoModalTemplateName').textContent = title;
+  document.getElementById('z_connectStatus').className = 'connect-status hidden';
+  fetch(`/templates/zoho-settings/${id}`)
+    .then(r => r.json())
+    .then(({ success, data }) => {
+      if (!success) return;
+      const d = data;
+
+      document.getElementById('zohoEnabledToggle').checked = !!d.zohoEnabled;
+      document.getElementById('z_clientId').value          = d.zohoClientId       || '';
+      document.getElementById('z_clientSecret').value      = d.zohoClientSecret   || '';
+      document.getElementById('z_refreshToken').value      = d.zohoRefreshToken   || '';
+      document.getElementById('z_skipDuplicates').checked  = d.zohoSkipDuplicates !== false;
+      document.getElementById('z_extraFields').value       = objToKV(d.zohoExtraFields  || {});
+      document.getElementById('z_fieldMapping').value      = objToKV(d.zohoFieldMapping || {});
+      const dom = d.zohoApiDomain || 'https://www.zohoapis.com';
+      const dc  = dom.includes('.eu') ? 'eu' : dom.includes('.in') ? 'in' : dom.includes('.au') ? 'com.au' : 'com';
+      document.getElementById('z_dataCenter').value   = dc;
+      document.getElementById('z_apiDomain').value    = d.zohoApiDomain   || 'https://www.zohoapis.com';
+      document.getElementById('z_accountsUrl').value  = d.zohoAccountsUrl || 'https://accounts.zoho.com';
+
+      syncZohoToggleUI();
+    })
+    .catch(() => {
+      syncZohoToggleUI();
+    });
+
+  document.getElementById('zohoModal').classList.add('open');
+}
+
+function closeZohoModal() {
+  document.getElementById('zohoModal').classList.remove('open');
+  currentZohoTemplateId = null;
+}
+
+function handleZohoOverlay(e) {
+  if (e.target === document.getElementById('zohoModal')) closeZohoModal();
+}
+
+function syncZohoToggleUI() {
+  const enabled = document.getElementById('zohoEnabledToggle').checked;
+  document.getElementById('zohoCreds').style.opacity      = enabled ? '1' : '.45';
+  document.getElementById('zohoCreds').style.pointerEvents = enabled ? 'all' : 'none';
+}
+
+function syncDataCenter() {
+  const dc = document.getElementById('z_dataCenter').value;
+  const map = {
+    'com':    ['https://www.zohoapis.com',    'https://accounts.zoho.com'],
+    'eu':     ['https://www.zohoapis.eu',     'https://accounts.zoho.eu'],
+    'in':     ['https://www.zohoapis.in',     'https://accounts.zoho.in'],
+    'com.au': ['https://www.zohoapis.com.au', 'https://accounts.zoho.com.au'],
+  };
+  const [api, acc] = map[dc] || map['com'];
+  document.getElementById('z_apiDomain').value   = api;
+  document.getElementById('z_accountsUrl').value = acc;
+}
+
+function toggleEye(inputId, btn) {
+  const inp  = document.getElementById(inputId);
+  const icon = btn.querySelector('i');
+  inp.type       = inp.type === 'password' ? 'text' : 'password';
+  icon.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+
+function kvToObj(text) {
+  const obj = {};
+  (text || '').split('\n').forEach(line => {
+    const eq = line.indexOf('=');
+    if (eq > 0) {
+      const k = line.slice(0, eq).trim();
+      const v = line.slice(eq + 1).trim();
+      if (k && v) obj[k] = v;
+    }
+  });
+  return obj;
+}
+
+function objToKV(obj) {
+  if (!obj || typeof obj !== 'object') return '';
+  return Object.entries(obj).map(([k, v]) => `${k}=${v}`).join('\n');
+}
+
+async function testZohoConn() {
+  if (!currentZohoTemplateId) return;
+
+  const saved = await saveZohoSettings(true); 
+  if (!saved) return;
+
+  const btn = document.getElementById('z_testBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">↻</span> Testing…';
+
+  const statusEl = document.getElementById('z_connectStatus');
+  const msgEl    = document.getElementById('z_connectMsg');
+
+  try {
+    const res  = await fetch(`/templates/zoho-test/${currentZohoTemplateId}`, { method: 'POST' });
+    const data = await res.json();
+
+    statusEl.className = `connect-status ${data.success ? 'success' : 'error'}`;
+    msgEl.textContent  = data.success
+      ? `✓ Connected — Org: ${data.orgName || 'Zoho CRM'}`
+      : `✕ ${data.message}`;
+  } catch {
+    statusEl.className = 'connect-status error';
+    msgEl.textContent  = '✕ Connection failed — check credentials';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-plug"></i> Test Connection';
+  }
+}
+
+async function saveZohoSettings(silent = false) {
+  if (!currentZohoTemplateId) return false;
+
+  const enabled = document.getElementById('zohoEnabledToggle').checked;
+
+  const payload = {
+    zohoEnabled:        enabled,
+    zohoClientId:       document.getElementById('z_clientId').value.trim(),
+    zohoClientSecret:   document.getElementById('z_clientSecret').value.trim(),
+    zohoRefreshToken:   document.getElementById('z_refreshToken').value.trim(),
+    zohoApiDomain:      document.getElementById('z_apiDomain').value,
+    zohoAccountsUrl:    document.getElementById('z_accountsUrl').value,
+    zohoSkipDuplicates: document.getElementById('z_skipDuplicates').checked,
+    zohoFieldMapping:   kvToObj(document.getElementById('z_fieldMapping').value),
+    zohoExtraFields:    kvToObj(document.getElementById('z_extraFields').value),
+  };
+
+  if (enabled && (!payload.zohoClientId || !payload.zohoClientSecret || !payload.zohoRefreshToken)) {
+    notyf.error('Please fill in Client ID, Client Secret and Refresh Token');
+    return false;
+  }
+
+  const btn = document.getElementById('z_saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">↻</span> Saving…';
+
+  try {
+    const res  = await fetch(`/templates/zoho-settings/${currentZohoTemplateId}`, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      const badge = document.getElementById(`zohoBtn-${currentZohoTemplateId}`);
+      if (badge) {
+        badge.className = `zoho-badge ${enabled ? 'on' : 'off'}`;
+        badge.innerHTML = `
+          <svg width="12" height="12" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="6" fill="${enabled ? '#e8274b' : '#b0b4c4'}"/>
+            <text x="7" y="27" font-size="18" font-weight="800" fill="white" font-family="Arial">Z</text>
+          </svg>
+          ${enabled ? 'Zoho ON' : 'Zoho OFF'}`;
+      }
+      if (!silent) {
+        notyf.success(enabled ? 'Zoho CRM enabled & saved!' : 'Zoho CRM settings saved');
+        closeZohoModal();
+      }
+      return true;
+    } else {
+      if (!silent) notyf.error(data.message || 'Failed to save Zoho settings');
+      return false;
+    }
+  } catch {
+    if (!silent) notyf.error('Something went wrong');
+    return false;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Zoho Settings';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeZohoModal();
+});
+</script>
+
+<%- include('../layouts/footer') %>

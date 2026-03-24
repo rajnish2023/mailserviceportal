@@ -1,0 +1,595 @@
+<%- include('../layouts/header', { title: 'My Profile' }) %>
+<%- include('../layouts/sidebar') %>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<style>
+  :root {
+    --primary:      #4361ee;
+    --primary-lt:   #eef0fd;
+    --primary-dk:   #3451d1;
+    --accent:       #7c3aed;
+    --success:      #2ec4b6;
+    --success-lt:   #e6faf8;
+    --danger:       #e63946;
+    --danger-lt:    #fff0f1;
+    --warning:      #f4a522;
+    --warning-lt:   #fff8ec;
+    --bg:           #f0f2f9;
+    --surface:      #ffffff;
+    --border:       #e2e5f0;
+    --text:         #1a1d2e;
+    --muted:        #6b7194;
+    --radius:       14px;
+    --radius-sm:    9px;
+    --shadow-sm:    0 1px 4px rgba(0,0,0,.05);
+    --shadow:       0 6px 24px rgba(0,0,0,.09);
+    --shadow-lg:    0 16px 48px rgba(0,0,0,.13);
+    --fh:           'Syne', sans-serif;
+    --fb:           'DM Sans', sans-serif;
+    --glow:         0 0 0 4px rgba(67,97,238,.14);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: var(--fb); font-size: 14px; color: var(--text); }
+
+  .page-wrap { padding: 28px 32px 56px; max-width: 1100px; }
+ 
+  .page-hdr { margin-bottom: 28px; }
+  .page-hdr-label {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .8px; margin-bottom: 5px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .page-hdr-label::before {
+    content: '';
+    display: inline-block; width: 18px; height: 2px;
+    background: var(--primary); border-radius: 2px;
+  }
+  .page-hdr-title {
+    font-family: var(--fh); font-size: 1.75rem; font-weight: 800;
+    color: var(--text); letter-spacing: -.5px;
+  }
+ 
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    animation: fadeUp .4s ease both;
+  }
+  .card:nth-child(2) { animation-delay: .06s; }
+  .card:nth-child(3) { animation-delay: .12s; }
+
+  .card-hdr {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbff;
+  }
+  .card-hdr-icon {
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .card-hdr-title {
+    font-family: var(--fh); font-size: 14px; font-weight: 700; color: var(--text);
+  }
+  .card-hdr-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .card-body { padding: 24px; }
+ 
+  .avatar-section {
+    display: flex; align-items: center; gap: 24px;
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .avatar-wrap { position: relative; flex-shrink: 0; }
+  .avatar-ring {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fh); font-size: 28px; font-weight: 800; color: #fff;
+    box-shadow: 0 6px 24px rgba(67,97,238,.35);
+    overflow: hidden; cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .avatar-ring:hover { transform: scale(1.04); box-shadow: 0 8px 32px rgba(67,97,238,.45); }
+  .avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-edit-btn {
+    position: absolute; bottom: 0; right: 0;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    border: 2.5px solid var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(67,97,238,.35);
+    transition: background .15s;
+  }
+  .avatar-edit-btn:hover { background: var(--primary-dk); }
+  #avatarInput { display: none; }
+
+  .avatar-info { flex: 1; min-width: 0; }
+  .avatar-name {
+    font-family: var(--fh); font-size: 1.25rem; font-weight: 800;
+    color: var(--text); letter-spacing: -.3px; margin-bottom: 4px;
+  }
+  .avatar-email { font-size: 13.5px; color: var(--muted); margin-bottom: 10px; }
+  .avatar-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .avatar-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  }
+  .badge-role  { background: var(--primary-lt); color: var(--primary); }
+  .badge-since { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+ 
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 11.5px; font-weight: 700; color: var(--text);
+    text-transform: uppercase; letter-spacing: .4px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .field-label .req { color: var(--danger); }
+
+  .field-wrap { position: relative; }
+  .field-ico {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); pointer-events: none; transition: color .2s;
+    display: flex; align-items: center; font-size: 15px;
+  }
+  .field-wrap:focus-within .field-ico { color: var(--primary); }
+
+  .field-input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--fb); font-size: 14px; color: var(--text);
+    background: #fafbff; outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+  .field-input:focus { border-color: var(--primary); background: #fff; box-shadow: var(--glow); }
+  .field-input::placeholder { color: #c4c9d8; }
+  .field-input.error { border-color: var(--danger); }
+  .field-input.error:focus { box-shadow: 0 0 0 4px rgba(230,57,70,.12); }
+
+  textarea.field-input { padding-left: 14px; resize: vertical; min-height: 90px; line-height: 1.65; }
+ 
+  .pwd-eye {
+    position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 15px; padding: 3px; border-radius: 5px;
+    display: flex; align-items: center; transition: color .15s;
+  }
+  .pwd-eye:hover { color: var(--primary); }
+
+   
+  .strength-wrap { margin-top: 6px; }
+  .strength-track {
+    height: 4px; background: var(--border); border-radius: 10px; overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .strength-fill { height: 100%; border-radius: 10px; transition: width .3s, background .3s; width: 0; }
+  .strength-txt { font-size: 11.5px; color: var(--muted); }
+ 
+  .btn-save {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 11px 22px; border-radius: var(--radius-sm);
+    font-family: var(--fb); font-size: 14px; font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+    color: #fff; border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(67,97,238,.3);
+    transition: transform .2s, box-shadow .2s;
+    position: relative; overflow: hidden;
+  }
+  .btn-save::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg,rgba(255,255,255,.12),transparent); pointer-events: none; }
+  .btn-save:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(67,97,238,.38); }
+  .btn-save:active:not(:disabled) { transform: translateY(0); }
+  .btn-save:disabled { opacity: .7; cursor: not-allowed; }
+
+  .btn-danger {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 11px 22px; border-radius: var(--radius-sm);
+    font-family: var(--fb); font-size: 14px; font-weight: 700;
+    background: linear-gradient(135deg, var(--danger), #c0212d);
+    color: #fff; border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(230,57,70,.28);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-danger:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(230,57,70,.38); }
+  .btn-danger:disabled { opacity: .7; cursor: not-allowed; }
+ 
+  .danger-zone {
+    border: 1.5px solid #ffd0d8;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .danger-zone-hdr {
+    background: #fff5f5;
+    padding: 14px 20px;
+    border-bottom: 1px solid #ffd0d8;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; color: var(--danger);
+  }
+  .danger-zone-body { padding: 18px 20px; }
+  .danger-zone-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .danger-zone-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+ 
+  .stats-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0; border-bottom: 1px solid var(--border);
+  }
+  .stat-cell {
+    padding: 18px 24px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-cell-val {
+    font-family: var(--fh); font-size: 1.6rem; font-weight: 800;
+    color: var(--text); letter-spacing: -1px; line-height: 1; margin-bottom: 4px;
+  }
+  .stat-cell-lbl { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; }
+ 
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 15px; height: 15px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; animation: spin .65s linear infinite; display: inline-block; }
+ 
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 768px) {
+    .page-wrap { padding: 16px; }
+    .field-row { grid-template-columns: 1fr; }
+    .field-row.three { grid-template-columns: 1fr; }
+    .stats-strip { grid-template-columns: 1fr 1fr; }
+    .avatar-section { flex-direction: column; text-align: center; }
+  }
+</style>
+
+<div class="page-wrap">
+ 
+  <div class="page-hdr">
+    <div class="page-hdr-label">Account</div>
+    <h1 class="page-hdr-title">My Profile</h1>
+  </div>
+
+  <div class="row g-4">
+ 
+    <div class="col-lg-12">
+ 
+      <div class="card mb-4">
+ 
+        <div class="avatar-section">
+          <div class="avatar-wrap">
+            <div class="avatar-ring" onclick="document.getElementById('avatarInput').click()" title="Change avatar">
+              <% if (user.avatar) { %>
+                <img src="<%= user.avatar %>" alt="Avatar" id="avatarImg">
+              <% } else { %>
+                <span id="avatarInitials">
+                  <%= user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2) %>
+                </span>
+              <% } %>
+            </div>
+             
+            <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarChange(this)">
+          </div>
+
+          <div class="avatar-info">
+            <div class="avatar-name" id="displayName"><%= user.name %></div>
+            <div class="avatar-email" id="displayEmail"><%= user.email %></div>
+            <div class="avatar-badges">
+              <span class="avatar-badge badge-role">
+                <i class="bi bi-shield-check" style="font-size:11px;"></i>
+                <%= user.role || 'Member' %>
+              </span>
+              <span class="avatar-badge badge-since">
+                <i class="bi bi-calendar3" style="font-size:10px;"></i>
+                Joined <%= new Date(user.createdAt || Date.now()).toLocaleDateString('en-US',{month:'long',year:'numeric'}) %>
+              </span>
+            </div>
+          </div>
+        </div>
+ 
+        <div class="card-body">
+          <form id="profileForm" novalidate>
+
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Full Name <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="bi bi-person field-ico"></i>
+                  <input type="text" id="pName" class="field-input"
+                         value="<%= user.name %>" placeholder="John Doe" required>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Email Address <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="bi bi-envelope field-ico"></i>
+                  <input type="email" id="pEmail" class="field-input"
+                         value="<%= user.email %>" placeholder="you@company.com" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Phone Number</label>
+                <div class="field-wrap">
+                  <i class="bi bi-telephone field-ico"></i>
+                  <input type="tel" id="pPhone" class="field-input"
+                         value="<%= user.phone || '' %>" placeholder="+91 98765 43210">
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Company</label>
+                <div class="field-wrap">
+                  <i class="bi bi-building field-ico"></i>
+                  <input type="text" id="pCompany" class="field-input"
+                         value="<%= user.company || '' %>" placeholder="Your Company Name">
+                </div>
+              </div>
+            </div>
+
+            <div class="field-row full">
+              <div class="field">
+                <label class="field-label">Bio</label>
+                <textarea id="pBio" class="field-input" placeholder="Tell us a bit about yourself…" rows="3"><%= user.bio || '' %></textarea>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px;">
+              <button type="button" onclick="resetProfileForm()"
+                      style="padding:10px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:transparent;font-family:var(--fb);font-size:13.5px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;"
+                      onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='transparent'">
+                Reset
+              </button>
+              <button type="submit" class="btn-save" id="profileSaveBtn">
+                <span id="profileBtnContent" style="display:flex;align-items:center;gap:7px;">
+                  <i class="bi bi-check-lg"></i> Save Changes
+                </span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+ 
+      <div class="card mb-4">
+        <div class="card-hdr">
+          <div class="card-hdr-icon" style="background:var(--warning-lt);color:var(--warning);">
+            <i class="bi bi-key"></i>
+          </div>
+          <div>
+            <div class="card-hdr-title">Change Password</div>
+            <div class="card-hdr-sub">Use a strong password with at least 8 characters</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <form id="passwordForm" novalidate>
+
+            <div class="field-row full" style="margin-bottom:18px;">
+              <div class="field">
+                <label class="field-label">Current Password <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="bi bi-lock field-ico"></i>
+                  <input type="password" id="currentPwd" class="field-input"
+                         placeholder="Enter your current password" style="padding-right:40px;" required>
+                  <button type="button" class="pwd-eye" onclick="togglePwd('currentPwd', this)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">New Password <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="bi bi-lock-fill field-ico"></i>
+                  <input type="password" id="newPwd" class="field-input"
+                         placeholder="Min. 8 characters" style="padding-right:40px;" required
+                         oninput="checkStrength(this.value)">
+                  <button type="button" class="pwd-eye" onclick="togglePwd('newPwd', this)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <div class="strength-wrap">
+                  <div class="strength-track"><div class="strength-fill" id="strengthFill"></div></div>
+                  <span class="strength-txt" id="strengthTxt"></span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Confirm Password <span class="req">*</span></label>
+                <div class="field-wrap">
+                  <i class="bi bi-shield-lock field-ico"></i>
+                  <input type="password" id="confirmPwd" class="field-input"
+                         placeholder="Re-enter new password" style="padding-right:40px;" required>
+                  <button type="button" class="pwd-eye" onclick="togglePwd('confirmPwd', this)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+              <button type="submit" class="btn-save" id="pwdSaveBtn"
+                      style="background:linear-gradient(135deg,var(--warning),#d98b00);box-shadow:0 4px 16px rgba(244,165,34,.3);">
+                <span id="pwdBtnContent" style="display:flex;align-items:center;gap:7px;">
+                  <i class="bi bi-key"></i> Update Password
+                </span>
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+     
+      <div class="danger-zone">
+        <div class="danger-zone-hdr">
+          <i class="bi bi-exclamation-triangle"></i> Logout Zone
+        </div>
+        <div class="danger-zone-body">
+          <div class="danger-zone-item">
+            <div class="danger-zone-desc">
+              <strong style="color:var(--text);display:block;margin-bottom:3px;">Sign out of all sessions</strong>
+              This will invalidate all active login sessions across all devices.
+            </div>
+            <form action="/auth/logout" method="POST" onsubmit="return confirmLogout()" style="flex-shrink:0;">
+              <button type="submit" class="btn-danger" style="font-size:13px;padding:8px 16px;">
+                <i class="bi bi-box-arrow-right"></i> Sign Out All
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div> 
+
+   
+  </div>
+
+</div>
+
+<script>
+const notyf = new Notyf({ duration: 3000, position: { x:'right', y:'top' }, ripple: false });
+ 
+function togglePwd(id, btn) {
+  const inp  = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  inp.type       = inp.type === 'password' ? 'text' : 'password';
+  icon.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+
+ 
+function checkStrength(val) {
+  let score = 0;
+  if (val.length >= 8)           score++;
+  if (/[A-Z]/.test(val))         score++;
+  if (/[0-9]/.test(val))         score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+
+  const fill = document.getElementById('strengthFill');
+  const txt  = document.getElementById('strengthTxt');
+  const map  = [
+    { w:'0%',   bg:'',             t:'' },
+    { w:'25%',  bg:'var(--danger)',  t:'⚠ Weak' },
+    { w:'50%',  bg:'var(--warning)', t:'◑ Fair' },
+    { w:'75%',  bg:'var(--primary)', t:'▲ Good' },
+    { w:'100%', bg:'var(--success)', t:'✓ Strong' },
+  ];
+  fill.style.width      = map[score].w;
+  fill.style.background = map[score].bg;
+  txt.textContent       = map[score].t;
+  txt.style.color       = map[score].bg || 'var(--muted)';
+}
+ 
+document.getElementById('profileForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const name    = document.getElementById('pName').value.trim();
+  const email   = document.getElementById('pEmail').value.trim();
+  const phone   = document.getElementById('pPhone').value.trim();
+  const company = document.getElementById('pCompany').value.trim();
+  const bio     = document.getElementById('pBio').value.trim();
+
+  if (!name)  { notyf.error('Name is required.');  return; }
+  if (!email) { notyf.error('Email is required.'); return; }
+
+  setLoading('profileSaveBtn', 'profileBtnContent', true, 'Saving…');
+
+  try {
+    const res  = await fetch('/auth/update', {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body:        JSON.stringify({ name, email, phone, company,bio }),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      notyf.success('Profile updated successfully!');
+     
+      document.getElementById('displayName').textContent  = data.user.name;
+      document.getElementById('displayEmail').textContent = data.user.email;
+    } else {
+      notyf.error(data.message || 'Failed to update profile.');
+    }
+  } catch { notyf.error('Network error. Please try again.'); }
+  finally  { setLoading('profileSaveBtn', 'profileBtnContent', false, '<i class="bi bi-check-lg"></i> Save Changes'); }
+});
+ 
+function resetProfileForm() {
+  document.getElementById('profileForm').reset();
+  notyf.success('Form reset.');
+}
+ 
+document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const currentPassword = document.getElementById('currentPwd').value;
+  const newPassword     = document.getElementById('newPwd').value;
+  const confirmPassword = document.getElementById('confirmPwd').value;
+
+  if (!currentPassword) { notyf.error('Enter your current password.'); return; }
+  if (newPassword.length < 8) { notyf.error('New password must be at least 8 characters.'); return; }
+  if (newPassword !== confirmPassword) { notyf.error('New passwords do not match.'); return; }
+
+  setLoading('pwdSaveBtn', 'pwdBtnContent', true, 'Updating…');
+
+  try {
+    const res  = await fetch('/auth/change-password', {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body:        JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      notyf.success('Password changed! Redirecting to login…');
+      this.reset();
+      
+      setTimeout(() => { window.location.href = '/'; }, 1800);
+    } else {
+      notyf.error(data.message || 'Failed to change password.');
+    }
+  } catch { notyf.error('Network error. Please try again.'); }
+  finally  { setLoading('pwdSaveBtn', 'pwdBtnContent', false, '<i class="bi bi-key"></i> Update Password'); }
+});
+
+ 
+function setLoading(btnId, contentId, on, labelHtml) {
+  const btn     = document.getElementById(btnId);
+  const content = document.getElementById(contentId);
+  btn.disabled  = on;
+  content.innerHTML = on
+    ? `<div class="spinner"></div> ${labelHtml}`
+    : labelHtml;
+}
+ 
+['pName','pEmail','pPhone','pCompany','pWebsite',
+ 'currentPwd','newPwd','confirmPwd'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => el.classList.remove('error'));
+});
+
+  function confirmLogout() {
+    return confirm("Are you sure you want to logout?");
+  }
+
+</script>
+
+<%- include('../layouts/footer') %>

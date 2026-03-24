@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot Password — MailPortal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/x-icon" href="/images/favicon.png">
+<style>
+  :root {
+    --accent:      #4361ee;
+    --accent-dark: #3451d1;
+    --accent-glow: rgba(67,97,238,.16);
+    --danger:      #e8274b;
+    --success:     #2ec4b6;
+    --ink:         #0d1117;
+    --ink-2:       #1c2035;
+    --muted:       #7a829e;
+    --surface:     #ffffff;
+    --bg:          #f0f2f9;
+    --border:      #e2e6f0;
+    --radius:      16px;
+    --radius-sm:   10px;
+    --fh:          'Syne', sans-serif;
+    --fb:          'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: var(--fb); font-size: 14px; color: var(--ink); overflow: hidden; }
+
+  .page {
+    min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+    position: relative; overflow: hidden; background: var(--bg);
+  }
+  .bg-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, rgba(67,97,238,.07) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .bg-blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(72px); pointer-events: none;
+    animation: blobFloat 9s ease-in-out infinite;
+  }
+  .b1 { width:520px; height:520px; background:rgba(67,97,238,.11); top:-140px; left:-120px; animation-delay:0s; }
+  .b2 { width:420px; height:420px; background:rgba(232,39,75,.07);  bottom:-100px; right:-80px; animation-delay:-4s; }
+  .b3 { width:280px; height:280px; background:rgba(46,196,182,.07); top:35%; left:58%; animation-delay:-7s; }
+ 
+  .card {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 440px; margin: 20px;
+    background: var(--surface);
+    border-radius: var(--radius); border: 1px solid var(--border);
+    box-shadow: 0 2px 4px rgba(0,0,0,.04), 0 20px 60px rgba(67,97,238,.1);
+    overflow: hidden;
+    animation: cardIn .5s cubic-bezier(.175,.885,.32,1.1) both;
+  }
+  .card-bar { height: 3px; background: linear-gradient(90deg, #4361ee, #7c3aed, #e8274b); }
+  .card-body { padding: 38px 38px 34px; }
+ 
+  .brand {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    animation: fadeUp .5s .04s ease both; opacity: 0;
+  }
+  .brand-icon {
+    width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+    background: linear-gradient(135deg, #4361ee, #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--fh); font-size: 16px; font-weight: 800; color: #fff;
+    box-shadow: 0 4px 14px rgba(67,97,238,.32);
+  }
+  .brand-name { font-family: var(--fh); font-size: 17px; font-weight: 800; color: var(--ink); letter-spacing: -.3px; }
+  .brand-name b { color: var(--accent); font-weight: 800; }
+  .brand-pill {
+    margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: .6px;
+    text-transform: uppercase; color: var(--accent);
+    background: var(--accent-glow); border: 1px solid rgba(67,97,238,.18);
+    padding: 3px 9px; border-radius: 20px;
+  }
+ 
+  .ico-wrap {
+    width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px;
+    background: linear-gradient(135deg, #eef0fd, #f3eeff);
+    border: 1.5px solid rgba(67,97,238,.18);
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeUp .5s .07s ease both; opacity: 0;
+  }
+
+  
+  .head {
+    text-align: center; margin-bottom: 24px;
+    animation: fadeUp .5s .1s ease both; opacity: 0;
+  }
+  .head-title { font-family: var(--fh); font-size: 1.5rem; font-weight: 800; color: var(--ink); letter-spacing: -.5px; margin-bottom: 7px; }
+  .head-sub { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+
+   
+  .alert {
+    display: none; align-items: flex-start; gap: 9px;
+    padding: 10px 13px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; line-height: 1.5; margin-bottom: 18px;
+  }
+  .alert.show  { display: flex; }
+  .alert.error { background: #fff0f2; color: #b00028; border: 1px solid #ffd0d8; }
+  .alert.ok    { background: #e8fdf8; color: #0a7a50; border: 1px solid #b0e8d8; }
+ 
+  .field { margin-bottom: 22px; animation: fadeUp .5s .14s ease both; opacity: 0; }
+  .field-lbl {
+    display: block; font-size: 11.5px; font-weight: 700;
+    color: var(--ink-2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 7px;
+  }
+  .field-wrap { position: relative; }
+  .field-ico {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); pointer-events: none; transition: color .2s;
+    display: flex; align-items: center;
+  }
+  .field-wrap:focus-within .field-ico { color: var(--accent); }
+  .field-inp {
+    width: 100%; padding: 11px 14px 11px 38px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: var(--fb); font-size: 14px; color: var(--ink);
+    background: #fafbff; outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+  .field-inp::placeholder { color: #c2c8d8; }
+  .field-inp:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 4px var(--accent-glow); }
+  .field-inp.err { border-color: var(--danger); }
+ 
+  .btn-sub {
+    width: 100%; padding: 13px 20px; margin-bottom: 22px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; border: none; border-radius: var(--radius-sm);
+    font-family: var(--fb); font-size: 15px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 18px rgba(67,97,238,.3);
+    transition: transform .2s, box-shadow .2s;
+    animation: fadeUp .5s .19s ease both; opacity: 0;
+  }
+  .btn-sub::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg,rgba(255,255,255,.12),transparent); pointer-events: none; }
+  .btn-sub:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(67,97,238,.38); }
+  .btn-sub:active:not(:disabled) { transform: translateY(0); }
+  .btn-sub:disabled { opacity: .7; cursor: not-allowed; }
+ 
+  .success { display: none; text-align: center; animation: fadeUp .4s ease both; }
+  .success.show { display: block; }
+  .success-ico {
+    width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 18px;
+    background: linear-gradient(135deg, #e8fdf8, #d0f7f0);
+    border: 1.5px solid #a0dfc3; font-size: 28px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .success-title { font-family: var(--fh); font-size: 1.3rem; font-weight: 800; color: var(--ink); margin-bottom: 10px; }
+  .success-msg { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin-bottom: 24px; }
+  .success-msg strong { color: var(--ink); }
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 11px 24px; border-radius: var(--radius-sm);
+    font-family: var(--fb); font-size: 14px; font-weight: 600;
+    background: var(--accent-glow); color: var(--accent);
+    border: 1.5px solid rgba(67,97,238,.2); cursor: pointer;
+    text-decoration: none; transition: all .18s;
+  }
+  .btn-back:hover { background: var(--accent); color: #fff; }
+  .resend-row { margin-top: 14px; font-size: 13px; color: var(--muted); }
+  .resend-btn {
+    color: var(--accent); font-weight: 600; background: none; border: none;
+    cursor: pointer; font-family: var(--fb); font-size: 13px; padding: 0; transition: color .15s;
+  }
+  .resend-btn:hover:not(:disabled) { color: var(--accent-dark); }
+  .resend-btn:disabled { color: var(--muted); cursor: not-allowed; }
+ 
+  .footer { text-align: center; font-size: 13.5px; color: var(--muted); animation: fadeUp .5s .23s ease both; opacity: 0; }
+  .link { color: var(--accent); font-weight: 600; text-decoration: none; transition: color .15s; }
+  .link:hover { color: var(--accent-dark); }
+ 
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; animation: spin .65s linear infinite; }
+
+  @keyframes cardIn { from { opacity: 0; transform: translateY(26px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes blobFloat { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(18px,-18px) scale(1.04); } 66% { transform: translate(-14px,14px) scale(.97); } }
+
+  @media (max-width: 480px) {
+    .card-body { padding: 30px 22px 26px; }
+    .head-title { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="bg-grid"></div>
+  <div class="bg-blob b1"></div>
+  <div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div>
+
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+ 
+      <div class="brand">
+        <div class="brand-icon">M</div>
+        <div class="brand-name">Mail<b>Portal</b></div>
+      </div>
+ 
+      <div id="formSection">
+
+        <div class="ico-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4361ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+
+        <div class="head">
+          <h1 class="head-title">Forgot password?</h1>
+          <p class="head-sub">Enter your email and we'll send you a reset link right away.</p>
+        </div>
+ 
+        <div class="alert" id="alert">
+          <span id="alertIcon"></span>
+          <span id="alertMsg"></span>
+        </div>
+
+        <form id="forgotForm" novalidate>
+          <div class="field">
+            <label class="field-lbl" for="email">Email Address</label>
+            <div class="field-wrap">
+              <span class="field-ico">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </span>
+              <input type="email" id="email" name="email" class="field-inp"
+                     placeholder="you@company.com" autocomplete="email" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-sub" id="submitBtn">
+            <span id="btnContent" style="display:flex;align-items:center;gap:8px;">
+              Send Reset Link
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </span>
+          </button>
+        </form>
+
+        <div class="footer">
+          Remembered it? <a href="/" class="link">Back to Login</a>
+        </div>
+
+      </div>
+  
+      <div class="success" id="successSection">
+        <div class="success-ico">📬</div>
+        <div class="success-title">Check your inbox!</div>
+        <p class="success-msg">
+          We sent a reset link to<br>
+          <strong id="sentEmail"></strong>
+        </p>
+        <a href="/" class="btn-back">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
+          Back to Login
+        </a>
+        <div class="resend-row">
+          Didn't receive it?
+          <button class="resend-btn" id="resendBtn" onclick="resend()" disabled>
+            Resend in <span id="timerCount">60</span>s
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let lastEmail = '';
+let timerRef  = null;
+ 
+function showAlert(msg, type = 'error') {
+  const el = document.getElementById('alert');
+  document.getElementById('alertIcon').textContent = type === 'error' ? '⚠️' : '✅';
+  document.getElementById('alertMsg').textContent  = msg;
+  el.className = `alert ${type === 'error' ? 'error' : 'ok'} show`;
+}
+function hideAlert() { document.getElementById('alert').className = 'alert'; }
+ 
+function setLoading(on) {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = on;
+  document.getElementById('btnContent').innerHTML = on
+    ? `<div class="spinner"></div> Sending…`
+    : `Send Reset Link
+       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+         <line x1="22" y1="2" x2="11" y2="13"/>
+         <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+       </svg>`;
+}
+
+ 
+function showSuccess(email) {
+  document.getElementById('formSection').style.display = 'none';
+  document.getElementById('successSection').classList.add('show');
+  document.getElementById('sentEmail').textContent = email;
+  startTimer(60);
+}
+ 
+function startTimer(secs) {
+  const btn   = document.getElementById('resendBtn');
+  const count = document.getElementById('timerCount');
+  let   n     = secs;
+  btn.disabled = true;
+  clearInterval(timerRef);
+  timerRef = setInterval(() => {
+    n--;
+    if (n <= 0) {
+      clearInterval(timerRef);
+      btn.disabled    = false;
+      btn.textContent = 'Resend email';
+    } else {
+      btn.innerHTML = `Resend in <span id="timerCount">${n}</span>s`;
+    }
+  }, 1000);
+}
+ 
+async function resend() {
+  if (!lastEmail) return;
+  const btn = document.getElementById('resendBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Sending…';
+  try {
+    const r = await fetch('/auth/forgot-password', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: lastEmail }),
+    });
+    const d = await r.json();
+    if (d.success) startTimer(60);
+    else { btn.disabled = false; btn.textContent = 'Resend email'; }
+  } catch {
+    btn.disabled = false; btn.textContent = 'Resend email';
+  }
+}
+ 
+document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  hideAlert();
+
+  const email = document.getElementById('email').value.trim();
+  const re    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!email) {
+    document.getElementById('email').classList.add('err');
+    showAlert('Please enter your email address.');
+    return;
+  }
+  if (!re.test(email)) {
+    document.getElementById('email').classList.add('err');
+    showAlert('Please enter a valid email address.');
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const res  = await fetch('/auth/forgot-password', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email }),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      lastEmail = email;
+      showSuccess(email);
+    } else {
+      showAlert(data.message || 'Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  } catch {
+    showAlert('Network error. Please check your connection.');
+    setLoading(false);
+  }
+});
+
+document.getElementById('email').addEventListener('input', function() {
+  this.classList.remove('err');
+  hideAlert();
+});
+</script>
+
+</body>
+</html>

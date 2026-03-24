@@ -1,0 +1,583 @@
+<%- include('../layouts/header', { title: project.name }) %>
+<%- include('../layouts/sidebar') %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<style>
+  :root {
+    --primary:#4361ee;--primary-light:#eef0fd;--primary-hover:#3451d1;
+    --success:#2ec4b6;--success-light:#e6faf8;
+    --warning:#f4a522;--warning-light:#fff8ec;
+    --danger:#e63946;--danger-light:#fff0f1;
+    --purple:#7c3aed;--purple-light:#f3eeff;
+    --bg:#f0f2f9;--surface:#ffffff;--border:#e2e5f0;
+    --text:#1a1d2e;--text-muted:#6b7194;
+    --radius:12px;--radius-sm:8px;
+    --shadow-sm:0 1px 4px rgba(0,0,0,.05);
+    --shadow:0 4px 20px rgba(0,0,0,.08);
+    --font:'Plus Jakarta Sans',sans-serif;
+  }
+  body { background:var(--bg); font-family:var(--font); font-size:14px; color:var(--text); }
+ 
+  .page-wrap { padding:24px 28px 48px; max-width:1400px; }
+ 
+  .back-link {
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:13px; font-weight:600; color:var(--text-muted);
+    text-decoration:none; margin-bottom:18px;
+    transition:color .15s;
+  }
+  .back-link:hover { color:var(--primary); }
+ 
+  .proj-banner {
+    border-radius:var(--radius);
+    padding:24px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:24px;
+    position:relative; overflow:hidden;
+    box-shadow:0 6px 24px rgba(0,0,0,.12);
+  }
+  .proj-banner::before {
+    content:''; position:absolute; top:-50px; right:-50px;
+    width:200px; height:200px; border-radius:50%;
+    background:rgba(255,255,255,.07);
+  }
+  .proj-banner::after {
+    content:''; position:absolute; bottom:-60px; right:100px;
+    width:160px; height:160px; border-radius:50%;
+    background:rgba(255,255,255,.05);
+  }
+  .proj-banner-left { position:relative; z-index:1; }
+  .proj-banner-tag {
+    font-size:11px; font-weight:700; color:rgba(255,255,255,.6);
+    text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .proj-banner-name { font-size:1.6rem; font-weight:800; color:#fff; letter-spacing:-.5px; margin-bottom:6px; }
+  .proj-banner-meta { font-size:13px; color:rgba(255,255,255,.65); display:flex; align-items:center; gap:10px; }
+  .proj-banner-right { position:relative; z-index:1; display:flex; gap:10px; flex-shrink:0; }
+  .btn-banner {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:var(--radius-sm);
+    font-size:13px; font-weight:600; cursor:pointer; border:none;
+    text-decoration:none; transition:all .18s;
+  }
+  .btn-banner-white { background:#fff; color:var(--primary); box-shadow:0 2px 10px rgba(0,0,0,.12); }
+  .btn-banner-white:hover { background:#f0f2ff; color:var(--primary); }
+  .btn-banner-ghost { background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.25); }
+  .btn-banner-ghost:hover { background:rgba(255,255,255,.25); color:#fff; }
+ 
+  .section-label {
+    font-size:11px; font-weight:700; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:.8px;
+    margin-bottom:14px; display:flex; align-items:center; gap:8px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+ 
+  .mini-stat {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px 20px;
+    display:flex; align-items:center; gap:14px;
+    box-shadow:var(--shadow-sm);
+  }
+  .mini-stat-icon {
+    width:42px; height:42px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; flex-shrink:0;
+  }
+  .mini-stat-val { font-size:1.5rem; font-weight:800; color:var(--text); letter-spacing:-1px; line-height:1; }
+  .mini-stat-lbl { font-size:11.5px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; margin-top:3px; }
+ 
+  .tpl-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow-sm);
+    margin-bottom:16px; overflow:hidden;
+    transition:box-shadow .2s;
+  }
+  .tpl-card:hover { box-shadow:var(--shadow); }
+
+  .tpl-card-head {
+    display:flex; align-items:center; gap:14px;
+    padding:16px 20px; cursor:pointer;
+    transition:background .15s;
+    user-select:none;
+  }
+  .tpl-card-head:hover { background:#fafbff; }
+
+  .tpl-card-icon {
+    width:40px; height:40px; border-radius:9px; flex-shrink:0;
+    background:var(--primary-light);
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px; color:var(--primary);
+  }
+  .tpl-card-info { flex:1; min-width:0; }
+  .tpl-card-name { font-size:14px; font-weight:700; color:var(--text); margin-bottom:3px; }
+  .tpl-card-meta { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .tpl-apikey {
+    font-family:'Courier New',monospace; font-size:11.5px;
+    background:var(--bg); border:1px solid var(--border);
+    padding:1px 6px; border-radius:4px; color:var(--text);
+  }
+
+  .tpl-card-stats { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .tpl-stat-pill {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 9px; border-radius:20px; font-size:11.5px; font-weight:600;
+  }
+  .tpl-stat-sent   { background:var(--success-light); color:#0a7a50; }
+  .tpl-stat-failed { background:var(--danger-light);  color:var(--danger); }
+  .tpl-stat-total  { background:var(--primary-light); color:var(--primary); }
+
+  .tpl-chevron { color:var(--text-muted); font-size:14px; transition:transform .2s; flex-shrink:0; }
+  .tpl-card.open .tpl-chevron { transform:rotate(180deg); }
+
+  .tpl-card-body { display:none; border-top:1px solid var(--border); }
+  .tpl-card.open .tpl-card-body { display:block; }
+
+  
+  .log-table { width:100%; border-collapse:collapse; }
+  .log-table th {
+    font-size:11px; font-weight:700; color:var(--text-muted);
+    text-transform:uppercase; letter-spacing:.4px;
+    padding:10px 16px; border-bottom:1px solid var(--border);
+    background:#fafbff; text-align:left; white-space:nowrap;
+  }
+  .log-table td {
+    padding:11px 16px; font-size:13px; color:var(--text);
+    border-bottom:1px solid var(--border); vertical-align:middle;
+  }
+  .log-table tr:last-child td { border-bottom:none; }
+  .log-table tr:hover td { background:#fafbff; cursor:pointer; }
+
+  .status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; }
+  .status-sent   { background:var(--success-light); color:#0a7a50; }
+  .status-failed { background:var(--danger-light);  color:var(--danger); }
+
+  .trigger-pill { display:inline-flex; align-items:center; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; font-family:'Courier New',monospace; }
+  .trigger-form      { background:#eef0fd; color:var(--primary); }
+  .trigger-dashboard { background:#fff8ec; color:#a06000; }
+  .trigger-api       { background:#f3eeff; color:var(--purple); }
+ 
+  .btn-resend {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:6px; font-size:11.5px; font-weight:600;
+    border:1px solid var(--border); background:var(--surface);
+    color:var(--text-muted); cursor:pointer; transition:all .15s;
+    white-space:nowrap;
+  }
+  .btn-resend:hover { background:var(--warning-light); color:#a06000; border-color:#fdedc8; }
+  .btn-resend.sending { opacity:.6; cursor:not-allowed; }
+ 
+  .view-all-link {
+    display:block; text-align:center; padding:12px;
+    font-size:13px; font-weight:600; color:var(--primary);
+    text-decoration:none; border-top:1px solid var(--border);
+    transition:background .15s;
+  }
+  .view-all-link:hover { background:#fafbff; }
+ 
+  .empty-tpl {
+    text-align:center; padding:48px 20px; color:var(--text-muted);
+  }
+  .empty-tpl i { font-size:36px; opacity:.3; display:block; margin-bottom:12px; }
+ 
+  .domain-bar { margin-bottom:12px; }
+  .domain-bar:last-child { margin-bottom:0; }
+  .domain-bar-meta { display:flex; justify-content:space-between; margin-bottom:4px; font-size:12.5px; }
+  .domain-bar-track { height:5px; background:var(--bg); border-radius:10px; overflow:hidden; }
+  .domain-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,var(--primary),var(--purple)); transition:width .6s; }
+ 
+  .modal-overlay { position:fixed; inset:0; background:rgba(15,18,40,.5); backdrop-filter:blur(4px); z-index:9100; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .22s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal-box { background:var(--surface); border-radius:var(--radius); box-shadow:0 20px 60px rgba(0,0,0,.18); width:100%; max-width:580px; margin:16px; max-height:88vh; overflow-y:auto; transform:translateY(20px) scale(.97); transition:transform .25s cubic-bezier(.175,.885,.32,1.275); }
+  .modal-overlay.open .modal-box { transform:translateY(0) scale(1); }
+  .modal-hdr { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--border); background:#fafbff; position:sticky; top:0; z-index:1; }
+  .modal-hdr-title { font-size:14px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .modal-close { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:16px; transition:all .15s; }
+  .modal-close:hover { background:var(--danger-light); color:var(--danger); border-color:#ffb3b3; }
+  .modal-body { padding:20px; }
+  .detail-row { display:grid; grid-template-columns:120px 1fr; gap:8px 14px; padding:9px 0; border-bottom:1px solid var(--border); align-items:start; }
+  .detail-row:last-child { border-bottom:none; }
+  .detail-key { font-size:11.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; padding-top:2px; }
+  .detail-val { font-size:13.5px; color:var(--text); line-height:1.5; }
+  .formdata-box { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; font-family:'Courier New',monospace; font-size:12px; white-space:pre-wrap; word-break:break-all; max-height:160px; overflow-y:auto; margin-top:12px; line-height:1.7; }
+  .skel { background:linear-gradient(90deg,var(--bg) 25%,#e8eaf2 50%,var(--bg) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+  @keyframes shimmer { from{background-position:200% 0;} to{background-position:-200% 0;} }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+</style>
+
+<div class="page-wrap">
+ 
+  <a href="/projects" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to Projects
+  </a>
+ 
+  <div class="proj-banner" style="background:linear-gradient(135deg, <%= project.color || '#4361ee' %> 0%, <%= project.color || '#4361ee' %>cc 100%);">
+    <div class="proj-banner-left">
+      <div class="proj-banner-tag">
+        <i class="bi bi-folder2-open"></i> Project
+      </div>
+      <div class="proj-banner-name"><%= project.name %></div>
+      <div class="proj-banner-meta">
+        <% if (project.domain) { %>
+          <span><i class="bi bi-globe2 me-1"></i><%= project.domain %></span>
+          <span style="opacity:.4">•</span>
+        <% } %>
+        <span><i class="bi bi-file-earmark-check me-1"></i><%= stats.templates %> template<%= stats.templates !== 1 ? 's' : '' %></span>
+        <span style="opacity:.4">•</span>
+        <span><i class="bi bi-send me-1"></i><%= stats.total %> total submissions</span>
+        <% if (project.domainFilter && project.domainFilter !== 'none') { %>
+          <span style="opacity:.4">•</span>
+          <span style="background:rgba(255,255,255,.15);padding:1px 8px;border-radius:20px;font-size:11.5px;">
+            Domain: <%= project.domainFilter %>
+          </span>
+        <% } %>
+      </div>
+    </div>
+    <div class="proj-banner-right">
+      <a href="/template/new" class="btn-banner btn-banner-white">
+        <i class="bi bi-plus-lg"></i> Add Template
+      </a>
+      <a href="/analytics?projectId=<%= project._id %>" class="btn-banner btn-banner-ghost">
+        <i class="bi bi-bar-chart-line"></i> Analytics
+      </a>
+    </div>
+  </div>
+ 
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:var(--primary-light);color:var(--primary);"><i class="bi bi-file-earmark-check"></i></div>
+        <div>
+          <div class="mini-stat-val"><%= stats.templates %></div>
+          <div class="mini-stat-lbl">Templates</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:var(--success-light);color:var(--success);"><i class="bi bi-send-check"></i></div>
+        <div>
+          <div class="mini-stat-val"><%= stats.sent %></div>
+          <div class="mini-stat-lbl">Sent</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:var(--danger-light);color:var(--danger);"><i class="bi bi-x-circle"></i></div>
+        <div>
+          <div class="mini-stat-val"><%= stats.failed %></div>
+          <div class="mini-stat-lbl">Failed</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:var(--warning-light);color:var(--warning);"><i class="bi bi-graph-up"></i></div>
+        <div>
+          <div class="mini-stat-val">
+            <%= stats.total > 0 ? Math.round((stats.sent / stats.total) * 100) : 100 %>%
+          </div>
+          <div class="mini-stat-lbl">Success Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+ 
+    <div class="col-lg-12">
+
+      <div class="section-label">Templates & Email Logs</div>
+
+      <% if (templates && templates.length) { %>
+        <% templates.forEach(function(t, tIdx) { %>
+
+          <div class="tpl-card" id="tplCard-<%= t._id %>">
+ 
+            <div class="tpl-card-head" onclick="toggleTemplate('<%= t._id %>')">
+              <div class="tpl-card-icon"><i class="bi bi-file-earmark-check"></i></div>
+              <div class="tpl-card-info">
+                <div class="tpl-card-name"><%= t.title %></div>
+                <div class="tpl-card-meta">
+                  <span class="tpl-apikey"><%= t.apiKey %></span>
+                  <span class="status-badge" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;<%= t.isActive ? 'background:#e6faf8;color:#0a7a50;' : 'background:#fff0f0;color:#b00020;' %>">
+                    <i class="bi bi-circle-fill" style="font-size:6px;"></i>
+                    <%= t.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </div>
+              </div>
+              <div class="tpl-card-stats">
+                <span class="tpl-stat-pill tpl-stat-sent"><i class="bi bi-check-circle"></i> <%= t.totalSent %></span>
+                <% if (t.totalFailed > 0) { %>
+                  <span class="tpl-stat-pill tpl-stat-failed"><i class="bi bi-x-circle"></i> <%= t.totalFailed %></span>
+                <% } %>
+                <a href="/template/edit/<%= t._id %>" class="btn-resend" onclick="event.stopPropagation()" title="Edit Template">
+                  <i class="bi bi-pencil"></i>
+                </a>
+              </div>
+              <i class="bi bi-chevron-down tpl-chevron"></i>
+            </div>
+ 
+            <div class="tpl-card-body">
+              <% if (t.logs && t.logs.length) { %>
+                <div style="overflow-x:auto;">
+                  <table class="log-table">
+                    <thead>
+                      <tr>
+                        <th>Subject</th>
+                        <th>Recipient</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Sent At</th>
+                        <th style="text-align:center;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% t.logs.forEach(function(log) { %>
+                        <tr onclick="openLogDetail('<%= log._id %>')" style="cursor:pointer;">
+
+                          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;">
+                            <%= log.subject || '—' %>
+                          </td>
+
+                          <td style="font-size:12.5px;color:var(--text-muted);">
+                            <%= log.to && log.to[0] ? log.to[0] : '—' %>
+                            <% if (log.to && log.to.length > 1) { %>
+                              <span style="color:var(--primary);font-size:11px;"> +<%= log.to.length-1 %></span>
+                            <% } %>
+                            <% if (log.senderDomain) { %>
+                              <div style="font-size:11px;color:var(--text-muted);font-family:'Courier New',monospace;">@<%= log.senderDomain %></div>
+                            <% } %>
+                          </td>
+
+                          <td>
+                            <span class="trigger-pill trigger-<%= log.triggeredBy %>"><%= log.triggeredBy %></span>
+                          </td>
+
+                          <td>
+                            <span class="status-pill status-<%= log.status %>">
+                              <i class="bi bi-<%= log.status === 'sent' ? 'check-circle' : 'x-circle' %>"></i>
+                              <%= log.status %>
+                            </span>
+                          </td>
+
+                          <td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">
+                            <%= new Date(log.createdAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) %>
+                          </td>
+
+                          <td style="text-align:center;" onclick="event.stopPropagation()">
+                            <button class="btn-resend"
+                                    id="resendBtn-<%= log._id %>"
+                                    onclick="resendEmail('<%= project._id %>','<%= log._id %>',this)"
+                                    title="<%= log.status === 'failed' ? 'Retry sending this email' : 'Resend this email' %>">
+                              <i class="bi bi-arrow-repeat"></i>
+                              <%= log.status === 'failed' ? 'Retry' : 'Resend' %>
+                            </button>
+                          </td>
+
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+
+                <% if (t.totalSent + t.totalFailed > t.logs.length) { %>
+                  <a href="/analytics?templateId=<%= t._id %>" class="view-all-link">
+                    View all <%= t.totalSent + t.totalFailed %> logs →
+                  </a>
+                <% } %>
+
+              <% } else { %>
+                <div style="text-align:center;padding:28px;color:var(--text-muted);font-size:13px;">
+                  <i class="bi bi-inbox" style="font-size:26px;opacity:.3;display:block;margin-bottom:8px;"></i>
+                  No email logs yet for this template.
+                </div>
+              <% } %>
+            </div>
+
+          </div>
+
+        <% }) %>
+
+      <% } else { %>
+        <div class="tpl-card">
+          <div class="empty-tpl">
+            <i class="bi bi-file-earmark-x"></i>
+            <p style="font-size:14px;margin-bottom:12px;">No templates in this project yet.</p>
+            <a href="/template/new" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--primary);color:#fff;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none;">
+              <i class="bi bi-plus-lg"></i> Create First Template
+            </a>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+
+  </div>
+
+</div>
+ 
+<div class="modal-overlay" id="logModal" onclick="if(event.target===this)closeLogModal()">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-hdr-title"><i class="bi bi-envelope-open" style="color:var(--primary)"></i> Email Log Detail</div>
+      <button class="modal-close" onclick="closeLogModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalSkeleton">
+        <div style="display:grid;grid-template-columns:120px 1fr;gap:10px 14px;">
+          <% for(let i=0;i<7;i++) { %>
+            <div class="skel" style="height:13px;width:80px;"></div>
+            <div class="skel" style="height:13px;"></div>
+          <% } %>
+        </div>
+      </div>
+      <div id="modalContent" style="display:none;"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--border);background:#fafbff;">
+      <a href="#" id="modalFullLink" target="_blank" style="font-size:12.5px;color:var(--primary);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:5px;">
+        <i class="bi bi-box-arrow-up-right"></i> Full Details
+      </a>
+      <button onclick="closeLogModal()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);font-size:13px;cursor:pointer;color:var(--text-muted);">
+        <i class="bi bi-x"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const notyf = new Notyf({ duration: 2500, position: { x:'right', y:'top' }, ripple: false });
+ 
+function toggleTemplate(id) {
+  const card = document.getElementById('tplCard-' + id);
+  card.classList.toggle('open');
+}
+ 
+window.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll('.tpl-card');
+  if (cards.length === 1) cards[0].classList.add('open');
+});
+ 
+async function resendEmail(projectId, logId, btn) {
+  if (btn.classList.contains('sending')) return;
+  btn.classList.add('sending');
+
+  const origHTML = btn.innerHTML;
+  btn.innerHTML  = '<span style="width:12px;height:12px;border:2px solid #ccc;border-top-color:#888;border-radius:50%;animation:pg-spin .7s linear infinite;display:inline-block;"></span> Sending…';
+
+  try {
+    const res  = await fetch(`/projects/${projectId}/resend/${logId}`, {
+      method:      'POST',
+      credentials: 'include',
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      notyf.success('Email resent successfully!');
+      btn.innerHTML = '<i class="bi bi-check-circle"></i> Sent';
+      btn.style.background   = 'var(--success-light)';
+      btn.style.color        = '#0a7a50';
+      btn.style.borderColor  = '#a0dfc3';
+ 
+      const row        = btn.closest('tr');
+      const statusCell = row.querySelector('.status-pill');
+      if (statusCell) {
+        statusCell.className   = 'status-pill status-sent';
+        statusCell.innerHTML   = '<i class="bi bi-check-circle"></i> sent';
+      }
+ 
+      setTimeout(() => {
+        btn.innerHTML          = origHTML;
+        btn.style.background   = '';
+        btn.style.color        = '';
+        btn.style.borderColor  = '';
+        btn.classList.remove('sending');
+      }, 3000);
+    } else {
+      notyf.error(data.message || 'Failed to resend email');
+      btn.innerHTML = origHTML;
+      btn.classList.remove('sending');
+    }
+  } catch {
+    notyf.error('Network error. Please try again.');
+    btn.innerHTML = origHTML;
+    btn.classList.remove('sending');
+  }
+}
+ 
+function openLogDetail(id) {
+  document.getElementById('logModal').classList.add('open');
+  document.getElementById('modalSkeleton').style.display = '';
+  document.getElementById('modalContent').style.display  = 'none';
+  document.getElementById('modalFullLink').href          = `/analytics/log/${id}`;
+
+  fetch(`/analytics/log/${id}/json`, { credentials: 'include' })
+    .then(r => r.json())
+    .then(({ success, log }) => {
+      if (!success) throw new Error();
+      renderLogDetail(log);
+    })
+    .catch(() => {
+      document.getElementById('modalSkeleton').style.display = 'none';
+      document.getElementById('modalContent').innerHTML = '<p style="text-align:center;padding:24px;color:var(--text-muted);">Failed to load details.</p>';
+      document.getElementById('modalContent').style.display = '';
+    });
+}
+function closeLogModal() {
+  document.getElementById('logModal').classList.remove('open');
+}
+
+function renderLogDetail(log) {
+  const sc = log.status === 'sent'
+    ? { bg:'var(--success-light)', color:'#0a7a50' }
+    : { bg:'var(--danger-light)',  color:'var(--danger)' };
+
+  const trigColors = { form:'background:#eef0fd;color:var(--primary)', dashboard:'background:#fff8ec;color:#a06000', api:'background:#f3eeff;color:var(--purple)' };
+
+  document.getElementById('modalContent').innerHTML = `
+    <div>
+      <div class="detail-row"><span class="detail-key">Status</span>
+        <span><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:${sc.bg};color:${sc.color};">
+          <i class="bi bi-${log.status==='sent'?'check-circle':'x-circle'}"></i> ${log.status}
+        </span></span>
+      </div>
+      <div class="detail-row"><span class="detail-key">Template</span><span class="detail-val" style="font-weight:600;">${log.templateTitle||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Subject</span><span class="detail-val">${log.subject||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">From</span><span class="detail-val" style="font-size:13px;">${log.fromAddress||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">To</span><span class="detail-val" style="font-size:13px;">${(log.to||[]).join(', ')||'—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Source</span>
+        <span><span style="display:inline-flex;align-items:center;padding:2px 9px;border-radius:4px;font-size:11.5px;font-weight:600;font-family:monospace;${trigColors[log.triggeredBy]||''}">${log.triggeredBy}</span></span>
+      </div>
+      <div class="detail-row"><span class="detail-key">Sent At</span>
+        <span class="detail-val">${new Date(log.createdAt).toLocaleString('en-US',{dateStyle:'long',timeStyle:'short'})}</span>
+      </div>
+      ${log.errorMessage ? `<div class="detail-row"><span class="detail-key">Error</span><span style="color:var(--danger);font-size:13px;">${log.errorMessage}</span></div>` : ''}
+    </div>
+    <div style="font-size:11.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-top:14px;margin-bottom:8px;">
+      <i class="bi bi-braces me-1"></i> Submitted Form Data
+    </div>
+    <div class="formdata-box">${JSON.stringify(log.formData||{},null,2)}</div>
+  `;
+
+  document.getElementById('modalSkeleton').style.display = 'none';
+  document.getElementById('modalContent').style.display  = '';
+}
+ 
+function editProject() {
+  window.location.href = '/projects';
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeLogModal(); });
+ 
+const style = document.createElement('style');
+style.textContent = '@keyframes pg-spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+</script>
+
+<%- include('../layouts/footer') %>

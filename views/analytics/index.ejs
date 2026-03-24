@@ -1,0 +1,392 @@
+<%- include('../layouts/header', { title: 'Analytics' }) %>
+<%- include('../layouts/sidebar') %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<style>
+  :root {
+    --primary:#4361ee;--primary-light:#eef0fd;
+    --success:#2ec4b6;--success-light:#e6faf8;
+    --warning:#f4a522;--warning-light:#fff8ec;
+    --danger:#e63946;--danger-light:#fff0f1;
+    --purple:#7c3aed;--purple-light:#f3eeff;
+    --bg:#f0f2f9;--surface:#ffffff;--border:#e2e5f0;
+    --text:#1a1d2e;--text-muted:#6b7194;
+    --radius:12px;--radius-sm:8px;
+    --shadow-sm:0 1px 4px rgba(0,0,0,.05);
+    --shadow:0 4px 20px rgba(0,0,0,.08);
+    --font:'Plus Jakarta Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);}
+  .page-wrap{padding:28px 32px 48px;max-width:1400px;}
+
+  .page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+  .page-title{font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-.4px;}
+  .page-subtitle{font-size:13px;color:var(--text-muted);margin-top:3px;}
+
+  .section-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  .mini-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:14px;transition:all .2s;animation:fadeUp .35s ease both;}
+  .mini-stat:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+  .mini-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+
+  .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;box-shadow:var(--shadow-sm);}
+  .filter-group{display:flex;flex-direction:column;gap:5px;min-width:160px;}
+  .filter-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;}
+  .filter-control{padding:7px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;color:var(--text);background:var(--surface);outline:none;transition:border-color .18s;}
+  .filter-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(67,97,238,.1);}
+  .btn-filter{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;}
+  .btn-filter-primary{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(67,97,238,.28);}
+  .btn-filter-primary:hover{background:#3451d1;}
+  .btn-filter-ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .btn-filter-ghost:hover{background:var(--bg);color:var(--text);}
+
+  .main-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
+  .main-card-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:#fafbff;}
+  .main-card-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+
+  .log-table{width:100%;border-collapse:collapse;}
+  .log-table th{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;padding:11px 16px;border-bottom:1px solid var(--border);background:#fafbff;text-align:left;white-space:nowrap;}
+  .log-table td{padding:12px 16px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);vertical-align:middle;}
+  .log-table tr:last-child td{border-bottom:none;}
+  .log-table tr:hover td{background:#f8f9ff;cursor:pointer;}
+
+  .status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+  .status-sent{background:var(--success-light);color:#0a7a50;}
+  .status-failed{background:var(--danger-light);color:var(--danger);}
+  .trigger-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;font-family:'Courier New',monospace;}
+  .trigger-form{background:#eef0fd;color:var(--primary);}
+  .trigger-dashboard{background:#fff8ec;color:#a06000;}
+  .trigger-api{background:#f3eeff;color:var(--purple);}
+
+  .row-action{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text-muted);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .15s;text-decoration:none;}
+  .row-action:hover{background:var(--danger-light);color:var(--danger);border-color:#ffb3b3;}
+  .row-action.view:hover{background:var(--primary-light);color:var(--primary);border-color:#c8d0fa;}
+
+  .pg-wrap{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+  .pg-info{font-size:12.5px;color:var(--text-muted);}
+  .pg-btns{display:flex;gap:4px;}
+  .pg-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;transition:all .15s;}
+  .pg-btn:hover{background:var(--primary-light);color:var(--primary);border-color:#c8d0fa;}
+  .pg-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .pg-btn.disabled{opacity:.4;pointer-events:none;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,18,40,.5);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s;}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal-box{background:var(--surface);border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,.2);width:100%;max-width:680px;margin:16px;max-height:90vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .25s cubic-bezier(.175,.885,.32,1.275);}
+  .modal-overlay.open .modal-box{transform:translateY(0) scale(1);}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);background:#fafbff;position:sticky;top:0;}
+  .modal-title{font-size:14.5px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px;transition:all .15s;}
+  .modal-close:hover{background:#fff0f0;color:var(--danger);border-color:#ffb3b3;}
+  .modal-body{padding:22px;}
+  .detail-row{display:grid;grid-template-columns:130px 1fr;gap:8px 16px;margin-bottom:10px;align-items:start;}
+  .detail-key{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;padding-top:2px;}
+  .detail-val{font-size:13.5px;color:var(--text);}
+  .detail-divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+  .form-data-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-family:'Courier New',monospace;font-size:12.5px;color:var(--text);white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .mini-stat:nth-child(1){animation-delay:.04s;}
+  .mini-stat:nth-child(2){animation-delay:.08s;}
+  .mini-stat:nth-child(3){animation-delay:.12s;}
+  .mini-stat:nth-child(4){animation-delay:.16s;}
+
+  @media(max-width:768px){.page-wrap{padding:16px;}.filter-bar{flex-direction:column;}.filter-group{min-width:100%;}}
+</style>
+
+<div class="page-wrap">
+  <div class="page-hdr">
+    <div>
+      <div class="page-title"><i class="bi bi-bar-chart-line me-2" style="color:var(--primary)"></i>Email Analytics</div>
+      <div class="page-subtitle">Track every email sent through your templates</div>
+    </div>
+    <a href="/dashboard" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);text-decoration:none;font-size:13px;font-weight:500;transition:all .18s;"
+       onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--surface)'">
+      <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
+  </div>
+
+  <div class="section-label">Summary</div>
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-icon" style="background:var(--success-light);color:var(--success);"><i class="bi bi-send-check"></i></div>
+        <div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;">Total Sent</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-1px;"><%= totalSent %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-icon" style="background:var(--danger-light);color:var(--danger);"><i class="bi bi-x-circle"></i></div>
+        <div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;">Total Failed</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-1px;"><%= totalFailed %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-icon" style="background:var(--primary-light);color:var(--primary);"><i class="bi bi-ui-checks"></i></div>
+        <div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;">Via Form</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-1px;"><%= triggerMap.form || 0 %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="mini-stat">
+        <div class="mini-icon" style="background:var(--purple-light);color:var(--purple);"><i class="bi bi-graph-up-arrow"></i></div>
+        <div>
+          <div style="font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;">Success Rate</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--text);letter-spacing:-1px;">
+            <%= totalSent + totalFailed > 0 ? Math.round((totalSent / (totalSent + totalFailed)) * 100) : 100 %>%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Email Log</div>
+  <form method="GET" action="/analytics" class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">Template</span>
+      <select name="templateId" class="filter-control">
+        <option value="">All Templates</option>
+        <% templates.forEach(function(t) { %>
+          <option value="<%= t._id %>" <%= filters.templateId == t._id ? 'selected' : '' %>><%= t.title %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Status</span>
+      <select name="status" class="filter-control">
+        <option value="">All</option>
+        <option value="sent"   <%= filters.status === 'sent'   ? 'selected' : '' %>>Sent</option>
+        <option value="failed" <%= filters.status === 'failed' ? 'selected' : '' %>>Failed</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">From Date</span>
+      <input type="date" name="from" class="filter-control" value="<%= filters.from || '' %>">
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">To Date</span>
+      <input type="date" name="to" class="filter-control" value="<%= filters.to || '' %>">
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <button type="submit" class="btn-filter btn-filter-primary">
+        <i class="bi bi-search"></i> Filter
+      </button>
+      <a href="/analytics" class="btn-filter btn-filter-ghost">
+        <i class="bi bi-x"></i> Reset
+      </a>
+    </div>
+  </form>
+
+  <div class="main-card">
+    <div class="main-card-head">
+      <div class="main-card-title">
+        <i class="bi bi-list-ul" style="color:var(--success)"></i>
+        Email History
+      </div>
+      <span style="font-size:12px;color:var(--text-muted);">
+        <strong style="color:var(--text);"><%= totalLogs %></strong> records found
+      </span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Template</th>
+            <th>Subject</th>
+            <th>Recipient(s)</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Sent At</th>
+            <th style="text-align:center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (logs && logs.length) { %>
+            <% logs.forEach(function(log, i) { %>
+              <tr>
+                <td style="color:var(--text-muted);font-size:12px;"><%= ((currentPage-1)*15) + i + 1 %></td>
+                <td style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= log.templateTitle || '—' %></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);"><%= log.subject || '—' %></td>
+                <td style="font-size:12.5px;">
+                  <% if (log.to && log.to.length) { %>
+                    <%= log.to[0] %>
+                    <% if (log.to.length > 1) { %><span style="color:var(--primary);font-size:11px;"> +<%= log.to.length-1 %></span><% } %>
+                  <% } else { %>—<% } %>
+                </td>
+                <td><span class="trigger-pill trigger-<%= log.triggeredBy %>"><%= log.triggeredBy %></span></td>
+                <td>
+                  <span class="status-pill status-<%= log.status %>">
+                    <i class="bi bi-<%= log.status === 'sent' ? 'check-circle' : 'x-circle' %>"></i>
+                    <%= log.status %>
+                  </span>
+                </td>
+                <td style="font-size:12px;color:var(--text-muted);white-space:nowrap;">
+                  <%= new Date(log.createdAt).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) %>
+                </td>
+                <td style="text-align:center;">
+                  <div style="display:flex;gap:5px;justify-content:center;">
+                    <button class="row-action view" title="View Details"
+                            onclick="viewLog('<%= log._id %>')">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="row-action" title="Delete Log"
+                            onclick="deleteLog('<%= log._id %>', this)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">
+                <i class="bi bi-inbox" style="font-size:32px;opacity:.3;display:block;margin-bottom:10px;"></i>
+                No email logs found for the selected filters.
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <div class="pg-wrap">
+        <div class="pg-info">
+          Showing <%= ((currentPage-1)*15)+1 %>–<%= Math.min(currentPage*15, totalLogs) %> of <%= totalLogs %>
+        </div>
+        <div class="pg-btns">
+          <a href="?page=<%= currentPage-1 %>&templateId=<%= filters.templateId||'' %>&status=<%= filters.status||'' %>&from=<%= filters.from||'' %>&to=<%= filters.to||'' %>"
+             class="pg-btn <%= currentPage <= 1 ? 'disabled' : '' %>">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+          <% for (let p = 1; p <= totalPages; p++) { %>
+            <a href="?page=<%= p %>&templateId=<%= filters.templateId||'' %>&status=<%= filters.status||'' %>&from=<%= filters.from||'' %>&to=<%= filters.to||'' %>"
+               class="pg-btn <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
+          <% } %>
+          <a href="?page=<%= currentPage+1 %>&templateId=<%= filters.templateId||'' %>&status=<%= filters.status||'' %>&from=<%= filters.from||'' %>&to=<%= filters.to||'' %>"
+             class="pg-btn <%= currentPage >= totalPages ? 'disabled' : '' %>">
+            <i class="bi bi-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="logModal" onclick="handleModalClick(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title"><i class="bi bi-envelope-open" style="color:var(--primary)"></i> Email Log Detail</div>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div style="text-align:center;padding:40px;color:var(--text-muted);">
+        <div style="width:28px;height:28px;border:3px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div>
+        Loading…
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
+<script>
+const notyf = new Notyf({ duration: 2500, position: { x:'right', y:'top' }, ripple:false });
+const triggerMap =  JSON.stringify(triggerMap);
+new Chart(document.getElementById('sourceChart').getContext('2d'),{
+  type:'doughnut',
+  data:{
+    labels:['Form','Dashboard','API'],
+    datasets:[{data:[triggerMap.form||0,triggerMap.dashboard||0,triggerMap.api||0],backgroundColor:['#4361ee','#f4a522','#7c3aed'],borderWidth:0,hoverOffset:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}
+});
+
+
+async function viewLog(id) {
+  document.getElementById('logModal').classList.add('open');
+  document.getElementById('modalBody').innerHTML = `
+    <div style="text-align:center;padding:40px;color:var(--text-muted);">
+      <div style="width:28px;height:28px;border:3px solid var(--primary);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;"></div>
+      Loading…
+    </div>`;
+  try {
+    const res  = await fetch(`/analytics/log/${id}/json`);
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.message);
+    renderModal(data.log);
+  } catch (err) {
+    document.getElementById('modalBody').innerHTML = `<p style="color:var(--danger);text-align:center;padding:30px;">Failed to load log details.</p>`;
+  }
+}
+
+function renderModal(log) {
+  const fmt = v => v ? `<code style="font-family:'Courier New',monospace;font-size:12px;background:var(--bg);padding:2px 6px;border-radius:4px;">${v}</code>` : '<span style="color:var(--text-muted)">—</span>';
+  const statusColor = log.status === 'sent' ? '#0a7a50' : 'var(--danger)';
+  const statusBg    = log.status === 'sent' ? 'var(--success-light)' : 'var(--danger-light)';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><span class="detail-key">Status</span>
+      <span><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:${statusBg};color:${statusColor};">
+        <i class="bi bi-${log.status==='sent'?'check-circle':'x-circle'}"></i> ${log.status}
+      </span></span></div>
+    <div class="detail-row"><span class="detail-key">Template</span><span class="detail-val">${log.templateTitle || '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Subject</span><span class="detail-val">${log.subject || '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">From</span><span class="detail-val">${log.fromAddress || '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">To</span><span class="detail-val">${(log.to||[]).join(', ') || '—'}</span></div>
+    ${log.cc&&log.cc.length ? `<div class="detail-row"><span class="detail-key">CC</span><span class="detail-val">${log.cc.join(', ')}</span></div>` : ''}
+    ${log.bcc&&log.bcc.length ? `<div class="detail-row"><span class="detail-key">BCC</span><span class="detail-val">${log.bcc.join(', ')}</span></div>` : ''}
+    <div class="detail-row"><span class="detail-key">Source</span>
+      <span><span class="trigger-pill trigger-${log.triggeredBy}">${log.triggeredBy}</span></span></div>
+    <div class="detail-row"><span class="detail-key">Message ID</span><span>${fmt(log.messageId)}</span></div>
+    <div class="detail-row"><span class="detail-key">Sent At</span><span class="detail-val">${new Date(log.createdAt).toLocaleString('en-US',{dateStyle:'long',timeStyle:'short'})}</span></div>
+    ${log.errorMessage ? `<div class="detail-row"><span class="detail-key">Error</span><span style="color:var(--danger);font-size:13px;">${log.errorMessage}</span></div>` : ''}
+    <hr class="detail-divider">
+    <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Form Data Submitted</div>
+    <div class="form-data-box">${JSON.stringify(log.formData, null, 2) || '{}'}</div>
+  `;
+}
+
+function closeModal() {
+  document.getElementById('logModal').classList.remove('open');
+}
+function handleModalClick(e) {
+  if (e.target === document.getElementById('logModal')) closeModal();
+}
+
+async function deleteLog(id, btn) {
+  if (!confirm('Delete this log entry?')) return;
+  try {
+    const res  = await fetch(`/analytics/log/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      btn.closest('tr').style.transition = 'opacity .3s';
+      btn.closest('tr').style.opacity    = '0';
+      setTimeout(() => btn.closest('tr').remove(), 300);
+      notyf.success('Log deleted');
+    } else {
+      notyf.error(data.message || 'Failed to delete');
+    }
+  } catch {
+    notyf.error('Something went wrong');
+  }
+}
+</script>
+
+<%- include('../layouts/footer') %>
