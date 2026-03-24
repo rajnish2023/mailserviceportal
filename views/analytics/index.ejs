@@ -219,7 +219,7 @@
         <tbody>
           <% if (logs && logs.length) { %>
             <% logs.forEach(function(log, i) { %>
-              <tr>
+              <tr onclick="viewLog('<%= log._id %>')">
                 <td style="color:var(--text-muted);font-size:12px;"><%= ((currentPage-1)*15) + i + 1 %></td>
                 <td style="font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= log.templateTitle || '—' %></td>
                 <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);"><%= log.subject || '—' %></td>

@@ -31,6 +31,75 @@ function verifyToken(token) {
   }
 }
 
+
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+ 
+    if (!name?.trim() || !email?.trim() || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required.',
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters.',
+      });
+    }
+
+    
+    const existingUser = await User.findOne({
+      email: email.trim().toLowerCase(),
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already registered.',
+      });
+    }
+ 
+    const hashedPassword = await bcrypt.hash(password, 12);
+ 
+    const user = await User.create({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: hashedPassword,
+    });
+ 
+    const payload = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role || 'user',
+      tokenVersion: user.tokenVersion || 0,
+    };
+
+    
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    
+    res.cookie('token', token, COOKIE_OPTIONS);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Registration successful',
+      user: payload,
+    });
+
+  } catch (err) {
+    console.error('[register]', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong. Please try again.',
+    });
+  }
+};
  
 exports.checkAuth = (req, res) => {
   const decoded = verifyToken(req.cookies?.token);

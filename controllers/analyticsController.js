@@ -1,111 +1,102 @@
 const Template = require('../models/Template');
 const EmailLog = require('../models/emailLogModel');
+const Project = require('../models/Project');
 exports.getAnalytics = async (req, res) => {
   try {
-    const { templateId, status, from, to, page = 1 } = req.query;
-    const limit   = 15;
-    const skip    = (parseInt(page) - 1) * limit;
-
-    const { projectId: filterProjectId } = req.query;
-    const filter = {};
-    if (templateId)       filter.templateId = templateId;
-    if (filterProjectId)  filter.projectId  = filterProjectId;
-    if (status)           filter.status     = status;
+    const userId = req.user._id || req.user.id;
+    const { templateId, status, from, to, page = 1, projectId: filterProjectId } = req.query;
+    const limit = 15;
+    const skip = (parseInt(page) - 1) * limit;
+    const userTemplates = await Template.find({ createdBy: userId }, '_id title');
+    const userTemplateIds = userTemplates.map(t => t._id);
+    const filter = { templateId: { $in: userTemplateIds } };
+    if (templateId) filter.templateId = templateId;
+    if (filterProjectId) filter.projectId = filterProjectId;
+    if (status) filter.status = status;
     if (from || to) {
       filter.createdAt = {};
       if (from) filter.createdAt.$gte = new Date(from);
-      if (to)   filter.createdAt.$lte = new Date(new Date(to).setHours(23, 59, 59));
+      if (to) filter.createdAt.$lte = new Date(new Date(to).setHours(23, 59, 59));
     }
-
-  
     const [logs, totalLogs] = await Promise.all([
-      EmailLog.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      EmailLog.countDocuments(filter),
+      EmailLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      EmailLog.countDocuments(filter)
     ]);
 
-   
     const [totalSent, totalFailed, byTrigger] = await Promise.all([
-      EmailLog.countDocuments({ status: 'sent' }),
-      EmailLog.countDocuments({ status: 'failed' }),
+      EmailLog.countDocuments({ ...filter, status: 'sent' }),
+      EmailLog.countDocuments({ ...filter, status: 'failed' }),
       EmailLog.aggregate([
+        { $match: filter },
         { $group: { _id: '$triggeredBy', count: { $sum: 1 } } },
       ]),
     ]);
 
-   
     const topTemplates = await EmailLog.aggregate([
+      { $match: filter },
       { $group: { _id: '$templateId', title: { $first: '$templateTitle' }, count: { $sum: 1 }, lastSent: { $max: '$createdAt' } } },
-      { $sort:  { count: -1 } },
+      { $sort: { count: -1 } },
       { $limit: 5 },
     ]);
-
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
     const dailyVolume = await EmailLog.aggregate([
-      { $match: { createdAt: { $gte: sevenDaysAgo } } },
+      { $match: { ...filter, createdAt: { $gte: sevenDaysAgo } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
-          sent:   { $sum: { $cond: [{ $eq: ['$status', 'sent']   }, 1, 0] } },
+          sent: { $sum: { $cond: [{ $eq: ['$status', 'sent'] }, 1, 0] } },
           failed: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
         },
       },
       { $sort: { _id: 1 } },
     ]);
 
-    
     const dailyMap = {};
     dailyVolume.forEach(d => { dailyMap[d._id] = d; });
+
     const chartDays = [];
     for (let i = 6; i >= 0; i--) {
-      const d    = new Date();
+      const d = new Date();
       d.setDate(d.getDate() - i);
-      const key  = d.toISOString().split('T')[0];
+      const key = d.toISOString().split('T')[0];
       const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       chartDays.push({
         label,
-        sent:   dailyMap[key]?.sent   || 0,
+        sent: dailyMap[key]?.sent || 0,
         failed: dailyMap[key]?.failed || 0,
       });
     }
- 
-    const templates = await Template.find({}, 'title _id').sort({ title: 1 }).lean();
 
-   
-    const Project  = require('../models/Project');
     const projects = await Project.find({}, 'name _id color domain').sort({ name: 1 }).lean();
+    const templates = userTemplates.sort((a, b) => a.title.localeCompare(b.title));
 
     const domainBreakdown = await EmailLog.aggregate([
-      { $match: { senderDomain: { $ne: '' } } },
+      { $match: { ...filter, senderDomain: { $ne: '' } } },
       { $group: { _id: '$senderDomain', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 },
     ]);
 
-  
     const triggerMap = { form: 0, dashboard: 0, api: 0 };
     byTrigger.forEach(t => { if (triggerMap[t._id] !== undefined) triggerMap[t._id] = t.count; });
 
-    return res.render('analytics/index', {
+    res.render('analytics/index', {
       logs,
       totalLogs,
-      totalPages:    Math.ceil(totalLogs / limit),
-      currentPage:   parseInt(page),
+      totalPages: Math.ceil(totalLogs / limit),
+      currentPage: parseInt(page),
       totalSent,
       totalFailed,
       triggerMap,
       topTemplates,
-      chartDays:     JSON.stringify(chartDays),
+      chartDays: JSON.stringify(chartDays),
       templates,
       projects,
       domainBreakdown,
-     user:req.user,
+      user: req.user,
       filters: { templateId, status, from, to, projectId: filterProjectId },
     });
 
