@@ -361,9 +361,9 @@
     </div>
 
     <div class="modal-foot">
-      <a href="#" class="modal-foot-link" id="modalFullLink" target="_blank">
+      <!-- <a href="#" class="modal-foot-link" id="modalFullLink" target="_blank">
         <i class="bi bi-box-arrow-up-right"></i> View Full Details
-      </a>
+      </a> -->
       <button class="btn-modal-close" onclick="closeLogModal()">
         <i class="bi bi-x"></i> Close
       </button>
@@ -388,7 +388,7 @@ function openLogModal(id) {
  
   document.getElementById('modalSkeleton').style.display = '';
   document.getElementById('modalContent').style.display  = 'none';
-  document.getElementById('modalFullLink').href          = `/analytics/log/${id}`;
+  // document.getElementById('modalFullLink').href          = `/analytics/log/${id}`;
 
   modal.classList.add('open');
  
