@@ -33,7 +33,7 @@ exports.getTemplates = async (req, res) => {
 
   const templates = await Template.find(
     { createdBy: userId },
-    'title subject to apiKey isActive submissionCount lastSubmittedAt createdAt'
+    'title subject to apiKey isActive submissionCount lastSubmittedAt createdAt zohoEnabled'
   ).sort({ createdAt: -1 });
 
   res.render("templates/index", {
