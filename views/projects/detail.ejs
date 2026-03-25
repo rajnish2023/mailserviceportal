@@ -515,7 +515,7 @@ function openLogDetail(id) {
   document.getElementById('logModal').classList.add('open');
   document.getElementById('modalSkeleton').style.display = '';
   document.getElementById('modalContent').style.display  = 'none';
-  document.getElementById('modalFullLink').href          = `/analytics/log/${id}`;
+  // document.getElementById('modalFullLink').href          = `/analytics/log/${id}`;
 
   fetch(`/analytics/log/${id}/json`, { credentials: 'include' })
     .then(r => r.json())
