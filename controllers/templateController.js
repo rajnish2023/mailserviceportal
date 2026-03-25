@@ -320,21 +320,21 @@ exports.toggleActive = async (req, res) => {
      const data = req.body || {};
   
      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
-     const rateCheck = checkRateLimit(
-       ip,
-       template._id.toString(),
-       template.rateLimitMs  || 5 * 60 * 1000,  
-       template.rateLimitMax || 1000              
-     );
+    //  const rateCheck = checkRateLimit(
+    //    ip,
+    //    template._id.toString(),
+    //    template.rateLimitMs  || 5 * 60 * 1000,  
+    //    template.rateLimitMax || 1000              
+    //  );
  
-     if (!rateCheck.allowed) {
-       return res.status(429).json({
-         success:           false,
-         message:           rateCheck.message,
-         retryAfterSeconds: rateCheck.retryAfterSeconds,
-         code:              'RATE_LIMITED',
-       });
-     }
+    //  if (!rateCheck.allowed) {
+    //    return res.status(429).json({
+    //      success:           false,
+    //      message:           rateCheck.message,
+    //      retryAfterSeconds: rateCheck.retryAfterSeconds,
+    //      code:              'RATE_LIMITED',
+    //    });
+    //  }
  
      
      const spamCheck = checkSpam(data, {
