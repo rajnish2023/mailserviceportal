@@ -324,7 +324,7 @@ exports.toggleActive = async (req, res) => {
        ip,
        template._id.toString(),
        template.rateLimitMs  || 5 * 60 * 1000,  
-       template.rateLimitMax || 1              
+       template.rateLimitMax || 1000              
      );
  
      if (!rateCheck.allowed) {
