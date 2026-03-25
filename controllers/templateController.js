@@ -337,21 +337,21 @@ exports.toggleActive = async (req, res) => {
     //  }
  
      
-     const spamCheck = checkSpam(data, {
-       maxUrls:   1,
-       minLength: 3,
-       maxLength: 5000,
-     });
+    //  const spamCheck = checkSpam(data, {
+    //    maxUrls:   1,
+    //    minLength: 3,
+    //    maxLength: 5000,
+    //  });
  
-     if (spamCheck.isSpam) {
+    //  if (spamCheck.isSpam) {
         
-       console.warn(`[SPAM BLOCKED] template=${template._id} ip=${ip} keyword=${spamCheck.keyword || 'pattern'}`);
-       return res.status(400).json({
-         success: false,
-         message: spamCheck.reason || 'Your message could not be submitted.',
-         code:    'SPAM_DETECTED',
-       });
-     }
+    //    console.warn(`[SPAM BLOCKED] template=${template._id} ip=${ip} keyword=${spamCheck.keyword || 'pattern'}`);
+    //    return res.status(400).json({
+    //      success: false,
+    //      message: spamCheck.reason || 'Your message could not be submitted.',
+    //      code:    'SPAM_DETECTED',
+    //    });
+    //  }
   
      if (template.allowedProviders && template.allowedProviders.length > 0) {
        const senderField = template.senderEmailField || 'email';
