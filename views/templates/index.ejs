@@ -462,7 +462,7 @@
           <input type="hidden" id="z_accountsUrl"  value="https://accounts.zoho.com">
         </div>
 
-        <hr style="border-color:var(--border);margin:16px 0;">
+        <!-- <hr style="border-color:var(--border);margin:16px 0;">
         <div class="mform-group" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
           <input type="checkbox" id="z_skipDuplicates" checked
                  style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
@@ -485,7 +485,7 @@
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
             Default: name→Last_Name, email→Email, phone→Phone, company→Company, message→Description
           </div>
-        </div>
+        </div> -->
         <div class="connect-status hidden" id="z_connectStatus">
           <i class="bi bi-circle-fill" style="font-size:8px;"></i>
           <span id="z_connectMsg"></span>
@@ -623,9 +623,9 @@ function openZohoModal(id, title) {
       document.getElementById('z_clientId').value          = d.zohoClientId       || '';
       document.getElementById('z_clientSecret').value      = d.zohoClientSecret   || '';
       document.getElementById('z_refreshToken').value      = d.zohoRefreshToken   || '';
-      document.getElementById('z_skipDuplicates').checked  = d.zohoSkipDuplicates !== false;
-      document.getElementById('z_extraFields').value       = objToKV(d.zohoExtraFields  || {});
-      document.getElementById('z_fieldMapping').value      = objToKV(d.zohoFieldMapping || {});
+      // document.getElementById('z_skipDuplicates').checked  = d.zohoSkipDuplicates !== false;
+      // document.getElementById('z_extraFields').value       = objToKV(d.zohoExtraFields  || {});
+      // document.getElementById('z_fieldMapping').value      = objToKV(d.zohoFieldMapping || {});
       const dom = d.zohoApiDomain || 'https://www.zohoapis.com';
       const dc  = dom.includes('.eu') ? 'eu' : dom.includes('.in') ? 'in' : dom.includes('.au') ? 'com.au' : 'com';
       document.getElementById('z_dataCenter').value   = dc;
@@ -736,9 +736,9 @@ async function saveZohoSettings(silent = false) {
     zohoRefreshToken:   document.getElementById('z_refreshToken').value.trim(),
     zohoApiDomain:      document.getElementById('z_apiDomain').value,
     zohoAccountsUrl:    document.getElementById('z_accountsUrl').value,
-    zohoSkipDuplicates: document.getElementById('z_skipDuplicates').checked,
-    zohoFieldMapping:   kvToObj(document.getElementById('z_fieldMapping').value),
-    zohoExtraFields:    kvToObj(document.getElementById('z_extraFields').value),
+    // zohoSkipDuplicates: document.getElementById('z_skipDuplicates').checked,
+    // zohoFieldMapping:   kvToObj(document.getElementById('z_fieldMapping').value),
+    // zohoExtraFields:    kvToObj(document.getElementById('z_extraFields').value),
   };
 
   if (enabled && (!payload.zohoClientId || !payload.zohoClientSecret || !payload.zohoRefreshToken)) {
