@@ -708,7 +708,7 @@ function setDevice(device) {
 function insertVar(variable) {
   if (editor) {
     editor.selection.insertHTML(
-      `<span style="background:#fff3d6;border:1px solid #ffd98a;border-radius:4px;padding:1px 7px;color:#a05c00;font-family:monospace;font-size:12px;">${variable}</span>`
+      `${variable}`
     );
     showToast('✓', `Inserted ${variable}`, '#4361ee');
   }

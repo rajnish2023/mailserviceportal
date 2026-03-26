@@ -671,7 +671,7 @@ function setDevice(device) {
 function insertVar(variable) {
   if (editor) {
     editor.selection.insertHTML(
-      `<span style="background:#fff3d6;border:1px solid #ffd98a;border-radius:4px;padding:1px 7px;color:#a05c00;font-family:monospace;font-size:12px;">${variable}</span>`
+      `${variable}`
     );
     showToast('✓', `Inserted ${variable}`, '#4361ee');
   }
@@ -731,8 +731,8 @@ async function saveTemplate() {
       const testBtn = document.getElementById('testBtn');
       testBtn.disabled = false;
       testBtn.title = 'Send a test email for this template';
-
       showToast('✓', 'Template saved! You can now test it.', '#2ec4b6');
+      window.location.replace('/templates')
 
     } else {
       showToast('✕', data.message || 'Save failed.', '#e63946');
@@ -824,6 +824,7 @@ async function sendTestEmail() {
     if (res.ok && result.success) {
       closeTestModal();
       showToast('✓', 'Test email sent successfully!', '#2ec4b6');
+      
     } else {
       showToast('✕', result.message || 'Failed to send test email.', '#e63946');
     }
