@@ -16,59 +16,17 @@ const transporter = nodemailer.createTransport({
   tls: { rejectUnauthorized: false },
 });
 
-// function resolvePlaceholders(template, data = {}) {
-//   let subject = template.subject;
-//   let html    = template.html;
+function resolvePlaceholders(template, data = {}) {
+  let subject = template.subject;
+  let html    = template.html;
 
-//   Object.entries(data).forEach(([key, value]) => {
-//     const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
-//     subject = subject.replace(regex, value ?? '');
-//     html    = html.replace(regex, value ?? '');
-//   });
-
-//   return { subject, html };
-// }
-
- function resolvePlaceholders(template, data = {}) {
-  let subject = template.subject || '';
-  let html = template.html || '';
-  html = String(html);
-  subject = String(subject);
-  html = html.replace(/\{\{#if\s+(.*?)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, content) => {
-    const value = getNestedValue(data, key.trim());
-    return value ? content : '';
-  });
-  html = html.replace(/\{\{#each\s+(.*?)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, content) => {
-    const arr = getNestedValue(data, key.trim());
-
-    if (!Array.isArray(arr)) return '';
-
-    return arr.map(item => {
-      return content.replace(/\{\{\s*this\.(.*?)\s*\}\}/g, (_, subKey) => {
-        return item[subKey] ?? '';
-      });
-    }).join('');
-  });
-  html = html.replace(/\{\{\s*(.*?)\s*\}\}/g, (_, key) => {
-    return formatValue(getNestedValue(data, key.trim()));
-  });
-
-  subject = subject.replace(/\{\{\s*(.*?)\s*\}\}/g, (_, key) => {
-    return formatValue(getNestedValue(data, key.trim()));
+  Object.entries(data).forEach(([key, value]) => {
+    const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+    subject = subject.replace(regex, value ?? '');
+    html    = html.replace(regex, value ?? '');
   });
 
   return { subject, html };
-}
-
-function getNestedValue(obj, path) {
-  return path.split('.').reduce((acc, part) => acc?.[part], obj);
-}
-
-function formatValue(value) {
-  if (value == null) return '';
-  if (Array.isArray(value)) return value.join(', ');
-  if (typeof value === 'object') return JSON.stringify(value);
-  return String(value);
 }
 
 function buildFrom(template) {
