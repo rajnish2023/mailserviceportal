@@ -44,13 +44,12 @@ function buildFrom(template) {
 async function dispatchMail(template, data = {}, triggeredBy = 'form') {
   const { subject, html } = resolvePlaceholders(template, data);
   const fromAddress = buildFrom(template);
-  console.log(template.replyTo);
   const mailOptions = {
     from:    fromAddress,
     to:      template.to.join(', '),
     subject,
     html,
-    ...(template.replyTo        && { to: template.replyTo }),
+    ...(template.replyTo        && { to: data.email || template.replyTo }),
     ...(template.cc.length  > 0 && { cc:  template.cc.join(', ')  }),
     ...(template.bcc.length > 0 && { bcc: template.bcc.join(', ') }),
   };
