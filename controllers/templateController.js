@@ -41,22 +41,81 @@ function buildFrom(template) {
 }
 
 
+// async function dispatchMail(template, data = {}, triggeredBy = 'form') {
+//   const { subject, html } = resolvePlaceholders(template, data);
+//   const fromAddress = buildFrom(template);
+
+//   const mailOptions = {
+//     from:    fromAddress,
+//     to:      template.to.join(', '),
+//     subject,
+//     html,
+//     ...(template.replyTo        && { replyTo: template.replyTo }),
+//     ...(template.cc.length  > 0 && { cc:  template.cc.join(', ')  }),
+//     ...(template.bcc.length > 0 && { bcc: template.bcc.join(', ') }),
+//   };
+
+//   let info;
+
+//   try {
+//     info = await transporter.sendMail(mailOptions);
+//   } catch (mailErr) {
+//     await EmailLog.create({
+//       templateId:    template._id,
+//       templateTitle: template.title,
+//       triggeredBy,
+//       subject,
+//       to:           template.to,
+//       cc:           template.cc  || [],
+//       bcc:          template.bcc || [],
+//       formData:     data,
+//       messageId:    '',
+//       fromAddress,
+//       status:       'failed',
+//       errorMessage: mailErr.message,
+//     }).catch(() => {});
+//     throw mailErr;
+//   }
+
+
+//   EmailLog.create({
+//     templateId:    template._id,
+//     templateTitle: template.title,
+//     triggeredBy,
+//     subject,
+//     to:          template.to,
+//     cc:          template.cc  || [],
+//     bcc:         template.bcc || [],
+//     formData:    data,
+//     messageId:   info.messageId || '',
+//     fromAddress,
+//     status:      'sent',
+//   }).catch(() => {});
+
+//   return info;
+// }
+
 async function dispatchMail(template, data = {}, triggeredBy = 'form') {
   const { subject, html } = resolvePlaceholders(template, data);
   const fromAddress = buildFrom(template);
+  const senderEmailField = template.senderEmailField || 'email';
+  const submitterEmail   = data[senderEmailField] || '';
+
+  const resolvedReplyTo = template.replyTo
+    ? template.replyTo         
+    : submitterEmail;         
 
   const mailOptions = {
     from:    fromAddress,
     to:      template.to.join(', '),
     subject,
     html,
-    ...(template.replyTo        && { replyTo: template.replyTo }),
-    ...(template.cc.length  > 0 && { cc:  template.cc.join(', ')  }),
-    ...(template.bcc.length > 0 && { bcc: template.bcc.join(', ') }),
+    ...(resolvedReplyTo          && { replyTo: resolvedReplyTo }),
+    ...(template.cc.length  > 0  && { cc:  template.cc.join(', ')  }),
+    ...(template.bcc.length > 0  && { bcc: template.bcc.join(', ') }),
   };
 
   let info;
-
   try {
     info = await transporter.sendMail(mailOptions);
   } catch (mailErr) {
@@ -76,7 +135,6 @@ async function dispatchMail(template, data = {}, triggeredBy = 'form') {
     }).catch(() => {});
     throw mailErr;
   }
-
 
   EmailLog.create({
     templateId:    template._id,
