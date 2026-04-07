@@ -29,13 +29,16 @@ const transporter = nodemailer.createTransport({
 //   return { subject, html };
 // }
 
-function resolvePlaceholders(template, data = {}) {
-  let html = template;
-  html = html.replace(/\{\{#if\s+(.*?)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, key, content) => {
+ function resolvePlaceholders(template, data = {}) {
+  let subject = template.subject || '';
+  let html = template.html || '';
+  html = String(html);
+  subject = String(subject);
+  html = html.replace(/\{\{#if\s+(.*?)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, key, content) => {
     const value = getNestedValue(data, key.trim());
     return value ? content : '';
   });
-  html = html.replace(/\{\{#each\s+(.*?)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, key, content) => {
+  html = html.replace(/\{\{#each\s+(.*?)\}\}([\s\S]*?)\{\{\/each\}\}/g, (_, key, content) => {
     const arr = getNestedValue(data, key.trim());
 
     if (!Array.isArray(arr)) return '';
@@ -46,12 +49,15 @@ function resolvePlaceholders(template, data = {}) {
       });
     }).join('');
   });
- 
   html = html.replace(/\{\{\s*(.*?)\s*\}\}/g, (_, key) => {
     return formatValue(getNestedValue(data, key.trim()));
   });
 
-  return html;
+  subject = subject.replace(/\{\{\s*(.*?)\s*\}\}/g, (_, key) => {
+    return formatValue(getNestedValue(data, key.trim()));
+  });
+
+  return { subject, html };
 }
 
 function getNestedValue(obj, path) {
