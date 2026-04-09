@@ -441,7 +441,7 @@ function renderModal(log) {
   //   year:'numeric', hour:'2-digit', minute:'2-digit'
   // });
 
-  const snetAt = new Date(log.createdAt).toLocaleString('en-IN', {
+  const sentAt = new Date(log.createdAt).toLocaleString('en-IN', {
     month: 'short',day: 'numeric',hour: '2-digit',minute: '2-digit',hour12: true,timeZone: 'Asia/Kolkata'
   });
 
