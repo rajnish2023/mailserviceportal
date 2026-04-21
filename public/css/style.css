@@ -91,3 +91,12 @@ justify-content: center;
 font-weight: bold;
 font-size: 14px;
 }
+
+/* label hint */ 
+ 
+.label-hint {
+  font-size: 10px;    
+  color: #6c757d;
+  text-transform: capitalize;    
+  font-weight: 500;  
+}

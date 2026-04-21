@@ -16,212 +16,84 @@ const transporter = nodemailer.createTransport({
   tls: { rejectUnauthorized: false },
 });
 
-// function resolvePlaceholders(template, data = {}) {
-//   let subject = template.subject;
-//   let html    = template.html;
-
-//   Object.entries(data).forEach(([key, value]) => {
-//     const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
-//     subject = subject.replace(regex, value ?? '');
-//     html    = html.replace(regex, value ?? '');
-//   });
-
-//   return { subject, html };
-// }
-
-// function buildFrom(template) {
-//   if (template && template.fromEmail) {
-//     return template.fromName
-//       ? `"${template.fromName}" <${template.fromEmail}>`
-//       : template.fromEmail;
-//   }
-//   const name  = process.env.MAIL_FROM_NAME || 'App';
-//   const email = process.env.MAIL_FROM      || 'hello@pmstool.dynamicssquare.com';
-//   return `"${name}" <${email}>`;
-// }
-
-
-// async function dispatchMail(template, data = {}, triggeredBy = 'form') {
-//   const { subject, html } = resolvePlaceholders(template, data);
-//   const fromAddress = buildFrom(template);
-//   const mailOptions = {
-//     from:    fromAddress,
-//     to:      template.to.join(', '),
-//     subject,
-//     html,
-//     ...(template.replyTo        && { to: data.email || template.replyTo }),
-//     ...(template.cc.length  > 0 && { cc:  template.cc.join(', ')  }),
-//     ...(template.bcc.length > 0 && { bcc: template.bcc.join(', ') }),
-//   };
-
-//   let info;
-
-//   try {
-//     info = await transporter.sendMail(mailOptions);
-//   } catch (mailErr) {
-//     await EmailLog.create({
-//       templateId:    template._id,
-//       templateTitle: template.title,
-//       triggeredBy,
-//       subject,
-//       to:           data.email || template.replyTo || template.to,
-//       cc:           template.cc  || [],
-//       bcc:          template.bcc || [],
-//       formData:     data,
-//       messageId:    '',
-//       fromAddress,
-//       status:       'failed',
-//       errorMessage: mailErr.message,
-//     }).catch(() => {});
-//     throw mailErr;
-//   }
-
-
-//   EmailLog.create({
-//     templateId:    template._id,
-//     templateTitle: template.title,
-//     triggeredBy,
-//     subject,
-//     to:          data.email || template.replyTo || template.to,
-//     cc:          template.cc  || [],
-//     bcc:         template.bcc || [],
-//     formData:    data,
-//     messageId:   info.messageId || '',
-//     fromAddress,
-//     status:      'sent',
-//   }).catch(() => {});
-
-//   return info;
-// }
-
- 
-  
-  
-function resolveString(str = '', data = {}) {
-  let result = str;
+function resolvePlaceholders(template, data = {}) {
+  let subject = template.subject;
+  let html    = template.html;
 
   Object.entries(data).forEach(([key, value]) => {
     const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
-    result = result.replace(regex, value ?? '');
+    subject = subject.replace(regex, value ?? '');
+    html    = html.replace(regex, value ?? '');
   });
 
-  return result.trim();
-}
- 
-function resolvePlaceholders(template, data = {}) {
-  return {
-    subject: resolveString(template.subject || '', data),
-    html: resolveString(template.html || '', data),
-  };
-}
- 
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return { subject, html };
 }
 
- 
-function buildFrom(template, data) {
-  const defaultName = process.env.MAIL_FROM_NAME || 'App';
-  const defaultEmail = process.env.MAIL_FROM || 'hello@pmstool.dynamicssquare.com';
-
-  const resolvedName = resolveString(template.fromName || '', data);
-  const fromEmail = template.fromEmail || defaultEmail;
-
-  return resolvedName
-    ? `"${resolvedName}" <${fromEmail}>`
-    : `"${defaultName}" <${fromEmail}>`;
-}
- 
-function resolveRecipients(template, data) {
-  const staticTo = Array.isArray(template.to) ? template.to : [];
- 
-  const resolvedStatic = staticTo
-    .map(email => resolveString(email, data))
-    .filter(isValidEmail);
- 
-  const resolvedReplyTo = resolveString(template.replyTo || '', data);
-  const isReplyToValid = isValidEmail(resolvedReplyTo);
- 
-  const userEmail =
-    isReplyToValid && isValidEmail(data.email)
-      ? data.email
-      : null;
-
-  return [...new Set([...resolvedStatic, ...(userEmail ? [userEmail] : [])])];
-}
- 
-async function dispatchMail(template, data = {}, triggeredBy = 'form') {
-
-  if (!template) throw new Error('Email template is required');
-  const { subject, html } = resolvePlaceholders(template, data);
-  const fromAddress = buildFrom(template, data);
-  const resolvedReplyTo = resolveString(template.replyTo || '', data);
-  const isReplyToValid = isValidEmail(resolvedReplyTo);
-  const recipients = resolveRecipients(template, data);
-
-  if (recipients.length === 0) {
-    throw new Error('No valid recipients defined');
+function buildFrom(template) {
+  if (template && template.fromEmail) {
+    return template.fromName
+      ? `"${template.fromName}" <${template.fromEmail}>`
+      : template.fromEmail;
   }
-  const resolveList = (list = []) =>
-    list
-      .map(item => resolveString(item, data))
-      .filter(isValidEmail);
+  const name  = process.env.MAIL_FROM_NAME || 'App';
+  const email = process.env.MAIL_FROM      || 'hello@pmstool.dynamicssquare.com';
+  return `"${name}" <${email}>`;
+}
 
-  const cc = resolveList(template.cc);
-  const bcc = resolveList(template.bcc);
+
+async function dispatchMail(template, data = {}, triggeredBy = 'form') {
+  const { subject, html } = resolvePlaceholders(template, data);
+  const fromAddress = buildFrom(template);
   const mailOptions = {
-    from: fromAddress,
-    to: recipients.join(', '),
+    from:    fromAddress,
+    to:      template.to.join(', '),
     subject,
     html,
-    ...(isReplyToValid && { replyTo: resolvedReplyTo }),
-
-    ...(cc.length > 0 && { cc: cc.join(', ') }),
-    ...(bcc.length > 0 && { bcc: bcc.join(', ') }),
+    ...(template.replyTo        && { to: data.email || template.replyTo }),
+    ...(template.cc.length  > 0 && { cc:  template.cc.join(', ')  }),
+    ...(template.bcc.length > 0 && { bcc: template.bcc.join(', ') }),
   };
 
   let info;
 
   try {
-    console.log('Sending Mail:', mailOptions);
-
     info = await transporter.sendMail(mailOptions);
+  } catch (mailErr) {
     await EmailLog.create({
-      templateId: template._id,
+      templateId:    template._id,
       templateTitle: template.title,
       triggeredBy,
       subject,
-      to: recipients,
-      cc,
-      bcc,
-      formData: data,
-      messageId: info.messageId || '',
+      to:           data.email || template.replyTo || template.to,
+      cc:           template.cc  || [],
+      bcc:          template.bcc || [],
+      formData:     data,
+      messageId:    '',
       fromAddress,
-      status: 'sent',
-    });
-
-  } catch (error) {
-    console.error('Mail Error:', error.message);
-    await EmailLog.create({
-      templateId: template._id,
-      templateTitle: template.title,
-      triggeredBy,
-      subject,
-      to: recipients,
-      cc,
-      bcc,
-      formData: data,
-      messageId: '',
-      fromAddress,
-      status: 'failed',
-      errorMessage: error.message,
+      status:       'failed',
+      errorMessage: mailErr.message,
     }).catch(() => {});
-
-    throw error;
+    throw mailErr;
   }
+
+
+  EmailLog.create({
+    templateId:    template._id,
+    templateTitle: template.title,
+    triggeredBy,
+    subject,
+    to:          data.email || template.replyTo || template.to,
+    cc:          template.cc  || [],
+    bcc:         template.bcc || [],
+    formData:    data,
+    messageId:   info.messageId || '',
+    fromAddress,
+    status:      'sent',
+  }).catch(() => {});
 
   return info;
 }
+
 
 
 
@@ -691,3 +563,4 @@ exports.testSend = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Failed to send test email', error: err.message });
   }
 };
+ 
