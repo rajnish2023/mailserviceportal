@@ -61,11 +61,7 @@ const templateSchema = new mongoose.Schema(
     
     to: {
       type: [String],
-      required: [true, 'At least one "To" email is required'],
-      validate: {
-        validator: (arr) => arr.length > 0,
-        message: 'At least one "To" email is required',
-      },
+      default: [],
     },
 
     cc:  { type: [String], default: [] },

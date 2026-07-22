@@ -448,7 +448,7 @@
           <hr class="sidebar-divider">
 
           <div class="mb-3">
-            <label class="form-label">To Email <span class="text-danger">*</span></label>
+            <label class="form-label">To Email</label>
             <div class="tag-input-box" id="toEmailsBox" onclick="focusTagInput('toEmailsInput')">
               <% template.to.forEach(function(email){ %>
                 <div class="tag-chip">
@@ -737,10 +737,6 @@ async function updateTemplate() {
   if (!subject) {
     showToast('⚠', 'Subject is required.', '#e63946');
     document.getElementById('subject').focus();
-    return;
-  }
-  if (!to.length) {
-    showToast('⚠', '"To Email" is required.', '#e63946');
     return;
   }
 

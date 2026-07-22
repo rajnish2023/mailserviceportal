@@ -147,7 +147,19 @@ function resolveRecipients(template, data) {
       ? data.email
       : null;
 
-  return [...new Set([...resolvedStatic, ...(userEmail ? [userEmail] : [])])];
+  const clientEmailField = template.senderEmailField || 'email';
+  const clientEmail = data[clientEmailField];
+  const isClientEmailValid = isValidEmail(clientEmail);
+
+  const finalRecipients = [...resolvedStatic];
+  if (userEmail) {
+    finalRecipients.push(userEmail);
+  }
+  if (isClientEmailValid) {
+    finalRecipients.push(clientEmail);
+  }
+
+  return [...new Set(finalRecipients)];
 }
  
 async function dispatchMail(template, data = {}, triggeredBy = 'form') {
@@ -241,7 +253,6 @@ exports.createTemplate = async (req, res) => {
     if (!title?.trim())   return res.status(400).json({ success: false, message: 'Template title is required' });
     if (!subject?.trim()) return res.status(400).json({ success: false, message: 'Subject is required' });
     if (!html?.trim())    return res.status(400).json({ success: false, message: 'HTML content is required' });
-    if (!to?.length)      return res.status(400).json({ success: false, message: 'At least one "To" email is required' });
 
 
     const userId = req.user._id || req.user.id;
@@ -263,7 +274,7 @@ exports.createTemplate = async (req, res) => {
       fromName:         fromName         || '',
       fromEmail:        fromEmail        || '',
       replyTo:          replyTo          || '',
-      to,
+      to:               to               || [],
       cc:               cc               || [],
       bcc:              bcc              || [],
       allowedProviders: Array.isArray(req.body.allowedProviders)
