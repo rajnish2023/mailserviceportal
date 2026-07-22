@@ -139,24 +139,19 @@ function resolveRecipients(template, data) {
     .map(email => resolveString(email, data))
     .filter(isValidEmail);
  
-  const resolvedReplyTo = resolveString(template.replyTo || '', data);
-  const isReplyToValid = isValidEmail(resolvedReplyTo);
- 
-  const userEmail =
-    isReplyToValid && isValidEmail(data.email)
-      ? data.email
-      : null;
-
-  const clientEmailField = template.senderEmailField || 'email';
-  const clientEmail = data[clientEmailField];
-  const isClientEmailValid = isValidEmail(clientEmail);
-
   const finalRecipients = [...resolvedStatic];
-  if (userEmail) {
-    finalRecipients.push(userEmail);
-  }
-  if (isClientEmailValid) {
-    finalRecipients.push(clientEmail);
+
+  if (template.replyTo && template.replyTo.trim() !== '') {
+    const clientEmailField = template.senderEmailField || 'email';
+    const clientEmail = data[clientEmailField];
+    if (isValidEmail(clientEmail)) {
+      finalRecipients.push(clientEmail);
+    }
+
+    const resolvedReplyTo = resolveString(template.replyTo, data);
+    if (isValidEmail(resolvedReplyTo)) {
+      finalRecipients.push(resolvedReplyTo);
+    }
   }
 
   return [...new Set(finalRecipients)];
