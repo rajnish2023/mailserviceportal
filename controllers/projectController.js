@@ -5,9 +5,14 @@ const EmailLog  = require('../models/emailLogModel');
 exports.getProjects = async (req, res) => {
   try {
     const userId   = req.user._id || req.user.id;
+    const isAdmin  = req.user.role === 'admin';
+    const query    = isAdmin ? {} : { createdBy: userId };
+
     const projects = await Project
-      .find({ createdBy: userId })
+      .find(query)
+      .populate('createdBy', 'name email')
       .sort({ createdAt: -1 });
+
     const projectsWithCount = await Promise.all(
       projects.map(async (p) => {
         const count = await Template.countDocuments({ projectId: p._id });
@@ -15,10 +20,17 @@ exports.getProjects = async (req, res) => {
       })
     );
 
+    let allUsers = [];
+    if (isAdmin) {
+      const User = require('../models/User');
+      allUsers = await User.find({}, 'name email').sort({ name: 1 });
+    }
+
     return res.render('projects/index', {
       title:    'Projects',
       user:     req.user,
       projects: projectsWithCount,
+      allUsers,
     });
   } catch (err) {
     console.error('[getProjects]', err);
@@ -67,6 +79,12 @@ exports.createProject = async (req, res) => {
 exports.updateProject = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
+    const query = req.user.role === 'admin' ? { _id: req.params.id } : { _id: req.params.id, createdBy: userId };
+    const checkProject = await Project.findOne(query);
+    if (!checkProject) {
+      return res.status(404).json({ success: false, message: 'Project not found or access denied.' });
+    }
+
     const { name, domain} = req.body;
 
     if (!name?.trim()) {
@@ -74,23 +92,22 @@ exports.updateProject = async (req, res) => {
     }
 
     const exists = await Project.findOne({
-      createdBy: userId,
+      createdBy: checkProject.createdBy,
       _id:       { $ne: req.params.id },
       name:      { $regex: new RegExp(`^${name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
     });
     if (exists) {
       return res.status(409).json({
         success: false,
-        message: `You already have a project named "${exists.name}".`,
+        message: `A project named "${exists.name}" already exists.`,
       });
     }
 
-    const project = await Project.findOneAndUpdate(
-      { _id: req.params.id, createdBy: userId },
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
       {
         name:         name.trim(),
         domain:       domain?.trim()       || '',
-        
       },
       { new: true, runValidators: true }
     );
@@ -113,7 +130,8 @@ exports.updateProject = async (req, res) => {
 exports.deleteProject = async (req, res) => {
   try {
     const userId  = req.user._id || req.user.id;
-    const project = await Project.findOneAndDelete({ _id: req.params.id, createdBy: userId });
+    const query = req.user.role === 'admin' ? { _id: req.params.id } : { _id: req.params.id, createdBy: userId };
+    const project = await Project.findOneAndDelete(query);
 
     if (!project) {
       return res.status(404).json({ success: false, message: 'Project not found.' });
@@ -149,8 +167,9 @@ exports.getProjectTemplates = async (req, res) => {
 exports.listProjects = async (req, res) => {
   try {
     const userId   = req.user._id || req.user.id;
+    const query = req.user.role === 'admin' ? { isActive: true } : { createdBy: userId, isActive: true };
     const projects = await Project
-      .find({ createdBy: userId, isActive: true }, 'name color domain domainFilter')
+      .find(query, 'name color domain domainFilter')
       .sort({ name: 1 });
 
     return res.status(200).json({ success: true, data: projects });

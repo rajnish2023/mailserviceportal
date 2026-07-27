@@ -303,10 +303,11 @@ exports.createTemplate = async (req, res) => {
 
 exports.getAllTemplates = async (req, res) => {
   try {
-
     const userId = req.user._id || req.user.id;
+    const query = req.user.role === 'admin' ? {} : { createdBy: userId };
     const templates = await Template
-      .find({ createdBy: userId }, 'title subject to apiKey isActive submissionCount lastSubmittedAt createdAt')
+      .find(query, 'title subject to apiKey isActive submissionCount lastSubmittedAt createdAt createdBy')
+      .populate('createdBy', 'name email')
       .sort({ createdAt: -1 });
     return res.status(200).json({ success: true, data: templates });
   } catch (err) {
@@ -318,7 +319,8 @@ exports.getAllTemplates = async (req, res) => {
 exports.editTemplate = async (req, res) => {
   try {
     const userId   = req.user._id || req.user.id;
-    const template = await Template.findOne({ _id: req.params.id, createdBy: userId });
+    const query = req.user.role === 'admin' ? { _id: req.params.id } : { _id: req.params.id, createdBy: userId };
+    const template = await Template.findOne(query);
     if (!template) return res.redirect('/templates'); 
     res.render('templates/edittemplate', { title: "Edit Template", user: req.user, template });
   } catch (err) {
@@ -340,7 +342,11 @@ exports.getTemplateById = async (req, res) => {
 
 exports.updateTemplate = async (req, res) => {
   try {
-    
+    const userId = req.user._id || req.user.id;
+    const query = req.user.role === 'admin' ? { _id: req.params.id } : { _id: req.params.id, createdBy: userId };
+    const checkTemplate = await Template.findOne(query);
+    if (!checkTemplate) return res.status(404).json({ success: false, message: 'Template not found or access denied' });
+
     if (req.body.allowedProviders !== undefined) {
       req.body.allowedProviders = Array.isArray(req.body.allowedProviders)
         ? req.body.allowedProviders
@@ -348,10 +354,9 @@ exports.updateTemplate = async (req, res) => {
     }
 
     if (req.body.title) {
-      const userId = req.user._id || req.user.id;
       const newTitle = req.body.title.trim();
       const duplicate = await Template.findOne({
-        createdBy: userId,
+        createdBy: checkTemplate.createdBy,
         _id:       { $ne: req.params.id }, 
         title:     { $regex: new RegExp(`^${newTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
       });
@@ -397,8 +402,9 @@ exports.toggleTemplate = async (req, res) => {
 exports.deleteTemplate = async (req, res) => {
   try {
     const userId   = req.user._id || req.user.id;
+    const query = req.user.role === 'admin' ? { _id: req.params.id } : { _id: req.params.id, createdBy: userId };
 
-    const template = await Template.findOneAndDelete({ _id: req.params.id, createdBy: userId });
+    const template = await Template.findOneAndDelete(query);
     if (!template) return res.status(404).json({ success: false, message: 'Template not found or access denied' });
     return res.status(200).json({ success: true, message: 'Template deleted' });
   } catch (err) {

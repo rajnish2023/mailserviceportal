@@ -11,16 +11,18 @@
   :root {
     --primary:       #4361ee;
     --primary-light: #eef0fd;
-    --danger:        #e63946;
-    --bg:            #f4f5fb;
+    --primary-hover: #3451d1;
+    --success:       #06d6a0;
+    --danger:        #ef476f;
+    --bg:            #f8f9fd;
     --surface:       #ffffff;
-    --border:        #e2e5f0;
-    --text:          #1e2030;
-    --text-muted:    #6b7194;
-    --radius:        10px;
-    --radius-sm:     7px;
-    --shadow-sm:     0 1px 4px rgba(0,0,0,.06);
-    --shadow:        0 4px 20px rgba(0,0,0,.08);
+    --border:        #e6eaf4;
+    --text:          #0f111a;
+    --text-muted:    #7b809a;
+    --radius:        16px;
+    --radius-sm:     10px;
+    --shadow-sm:     0 4px 12px rgba(0, 0, 0, 0.03);
+    --shadow:        0 12px 30px rgba(0, 0, 0, 0.06);
   }
 
   body { background: var(--bg); font-size: 14px; }
@@ -55,45 +57,62 @@
   }
 
   .templates-wrapper {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
-
+  .templates-wrapper:hover {
+    box-shadow: none;
+  }
 
   .template-row {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--border);
-    transition: background .15s;
+    gap: 20px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: all .25s cubic-bezier(.4, 0, .2, 1);
+    position: relative;
   }
-  .template-row:last-child { border-bottom: none; }
-  .template-row:hover { background: #fafbff; }
+  .template-row:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    border-color: rgba(67, 97, 238, 0.18);
+    background: var(--surface);
+    border-left-width: 6px !important;
+  }
 
   .tpl-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-sm);
-    background: var(--primary-light);
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #eef0fd, #dbebff);
     border: 1px solid #c8d0fa;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     color: var(--primary);
-    font-size: 20px;
+    font-size: 22px;
+    box-shadow: var(--shadow-sm);
+    transition: all .25s ease;
+  }
+  .template-row:hover .tpl-icon {
+    transform: scale(1.06) rotate(2deg);
   }
 
   .tpl-info { flex: 1; min-width: 0; }
   .tpl-name {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 15.5px;
+    font-weight: 700;
     color: var(--text);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -103,13 +122,13 @@
     color: var(--text-muted);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-wrap: wrap;
   }
   .tpl-meta .meta-label { font-weight: 500; }
   .tpl-apikey {
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     color: var(--text);
     background: var(--bg);
@@ -122,23 +141,24 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10.5px;
+    font-weight: 700;
     padding: 2px 8px;
     border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: .3px;
+    box-shadow: var(--shadow-sm);
   }
-  .status-active   { background: #e6faf5; color: #0a7a50; border: 1px solid #a0dfc3; }
-  .status-inactive { background: #fff0f0; color: #b00020; border: 1px solid #ffb3b3; }
+  .status-active   { background: #e6faf5; color: #06d6a0; border: 1px solid #bdf2e4; }
+  .status-inactive { background: #fff0f0; color: #ef476f; border: 1px solid #ffd3db; }
   .tpl-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex-shrink: 0;
   }
   .action-btn {
-    width: 34px; height: 34px;
+    width: 36px; height: 36px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface);
@@ -147,11 +167,12 @@
     cursor: pointer;
     font-size: 15px;
     text-decoration: none;
-    transition: all .15s;
+    transition: all .2s ease;
+    box-shadow: var(--shadow-sm);
   }
-  .action-btn:hover         { background: var(--primary-light); color: var(--primary); border-color: #c8d0fa; }
-  .action-btn.copy:hover    { background: #e6faf5; color: #0a7a50; border-color: #a0dfc3; }
-  .action-btn.danger:hover  { background: #fff0f0; color: var(--danger); border-color: #ffb3b3; }
+  .action-btn:hover         { background: var(--primary-light); color: var(--primary); border-color: #c8d0fa; transform: translateY(-1px); }
+  .action-btn.copy:hover    { background: #e6faf5; color: #06d6a0; border-color: #bdf2e4; transform: translateY(-1px); }
+  .action-btn.danger:hover  { background: #fff0f0; color: #ef476f; border-color: #ffcccc; transform: translateY(-1px); }
   .empty-state {
     padding: 60px 20px;
     text-align: center;
@@ -330,7 +351,7 @@
 
     <% if (templates && templates.length) { %>
       <% templates.forEach(function(t) { %>
-        <div class="template-row" data-name="<%= t.title.toLowerCase() %>">
+        <div class="template-row" data-name="<%= t.title.toLowerCase() %>" style="border-left: 4px solid <%= (t.projectId && t.projectId.color) ? t.projectId.color : 'var(--primary)' %>;">
 
           <div class="tpl-icon">
             <i class="bi bi-file-earmark-check"></i>
@@ -339,6 +360,11 @@
           <div class="tpl-info">
             <div class="tpl-name"><%= t.title %></div>
             <div class="tpl-meta">
+              <% if (user.role === 'admin' && t.createdBy) { %>
+                <span class="meta-label"><i class="bi bi-person-fill"></i> Owner:</span>
+                <span class="text-dark font-monospace" style="font-size:12px; font-weight:600;"><%= t.createdBy.name %></span>
+                <span class="text-muted">|</span>
+              <% } %>
               <span class="meta-label">Template ID:</span>
               <span class="tpl-apikey"><%= t.apiKey %></span>
               <span class="status-badge <%= t.isActive ? 'status-active' : 'status-inactive' %>">
@@ -360,6 +386,12 @@
               </svg>
               <%= t.zohoEnabled ? 'Zoho ON' : 'Zoho OFF' %>
             </button>
+            <% if (user.role === 'admin') { %>
+              <button class="action-btn" title="Transfer Owner"
+                      onclick="openTransferModal('<%= t._id %>', '<%= t.title.replace(/'/g,`\\'`) %>', '<%= t.createdBy ? t.createdBy._id : '' %>')">
+                <i class="bi bi-person-gear"></i>
+              </button>
+            <% } %>
             <a href="/template/edit/<%= t._id %>"
                class="action-btn" title="Edit Template">
               <i class="bi bi-pencil"></i>
@@ -390,6 +422,49 @@
   </div>
 
 </div>
+
+<% if (user.role === 'admin') { %>
+<!-- TRANSFER OWNERSHIP MODAL -->
+<div class="modal-overlay" id="transferModal" onclick="handleTransferOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-title">
+        <i class="bi bi-person-gear text-primary"></i> Transfer Template Owner
+      </div>
+      <button class="modal-close" onclick="closeTransferModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-hint">
+        <i class="bi bi-info-circle me-1" style="color:#a05c00"></i>
+        Transferring ownership will move this template and all its associated logs to the selected user's account.
+      </div>
+      <input type="hidden" id="trans_templateId">
+      <div class="mform-group">
+        <label class="mform-label">Template Name</label>
+        <input type="text" id="trans_templateName" class="mform-control" disabled>
+      </div>
+      <div class="mform-group">
+        <label class="mform-label">New Owner <span class="text-danger">*</span></label>
+        <select id="trans_targetUserId" class="mform-control" style="font-family:inherit;font-size:13px;">
+          <option value="">— Select Target User —</option>
+          <% if (locals.allUsers && locals.allUsers.length) { %>
+            <% allUsers.forEach(function(u) { %>
+              <option value="<%= u._id %>"><%= u.name %> (<%= u.email %>)</option>
+            <% }) %>
+          <% } %>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-z btn-z-ghost" onclick="closeTransferModal()">Cancel</button>
+      <button class="btn-z btn-z-primary" id="trans_saveBtn" onclick="submitTransfer()">
+        <i class="bi bi-check-lg"></i> Transfer Ownership
+      </button>
+    </div>
+  </div>
+</div>
+<% } %>
+
 <div class="modal-overlay" id="zohoModal" onclick="handleZohoOverlay(event)">
   <div class="modal-box">
 
@@ -780,8 +855,60 @@ async function saveZohoSettings(silent = false) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeZohoModal();
+  if (e.key === 'Escape') {
+    closeZohoModal();
+    if (typeof closeTransferModal === 'function') closeTransferModal();
+  }
 });
+
+// ADMIN TRANSFER FUNCTIONS
+function openTransferModal(id, title, currentOwnerId) {
+  document.getElementById('trans_templateId').value = id;
+  document.getElementById('trans_templateName').value = title;
+  const select = document.getElementById('trans_targetUserId');
+  select.value = '';
+  Array.from(select.options).forEach(opt => {
+    opt.disabled = opt.value === currentOwnerId;
+  });
+  document.getElementById('transferModal').classList.add('open');
+}
+function closeTransferModal() {
+  document.getElementById('transferModal').classList.remove('open');
+}
+function handleTransferOverlay(e) {
+  if (e.target === document.getElementById('transferModal')) closeTransferModal();
+}
+async function submitTransfer() {
+  const templateId = document.getElementById('trans_templateId').value;
+  const targetUserId = document.getElementById('trans_targetUserId').value;
+  if (!targetUserId) {
+    notyf.error('Please select a target user');
+    return;
+  }
+  const btn = document.getElementById('trans_saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">↻</span> Transferring…';
+  try {
+    const res = await fetch('/admin/templates/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ templateId, targetUserId })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      notyf.success('Template ownership transferred!');
+      closeTransferModal();
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      notyf.error(data.message || 'Transfer failed');
+    }
+  } catch {
+    notyf.error('Network error. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Transfer Ownership';
+  }
+}
 </script>
 
 <%- include('../layouts/footer') %>

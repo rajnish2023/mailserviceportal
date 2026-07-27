@@ -1,0 +1,631 @@
+<%- include('../layouts/header', { title: 'User Management' }) %>
+<%- include('../layouts/sidebar') %>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+<style>
+  :root {
+    --primary:       #4361ee;
+    --primary-light: #eef0fd;
+    --primary-hover: #3451d1;
+    --success:       #06d6a0;
+    --danger:        #ef476f;
+    --bg:            #f8f9fd;
+    --surface:       #ffffff;
+    --border:        #e6eaf4;
+    --text:          #0f111a;
+    --text-muted:    #7b809a;
+    --radius:        16px;
+    --radius-sm:     10px;
+    --shadow-sm:     0 4px 12px rgba(0, 0, 0, 0.03);
+    --shadow:        0 12px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  body { background: var(--bg); font-size: 14px; }
+  
+  .pg-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -.6px;
+    background: linear-gradient(135deg, var(--text) 30%, #4361ee 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .btn-create {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, var(--primary), #3b52d9);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .2s ease;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.25);
+  }
+  .btn-create:hover {
+    background: linear-gradient(135deg, #3b52d9, #2f42b8);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.35);
+    transform: translateY(-2px);
+  }
+
+  .users-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: all .3s ease;
+  }
+  .users-wrapper:hover {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .user-table {
+    width: 100%;
+    margin-bottom: 0;
+    vertical-align: middle;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .user-table th {
+    background: #fbfcfd;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    padding: 16px 24px;
+  }
+  .user-table td {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    transition: all .2s ease;
+  }
+  .user-table tr:last-child td {
+    border-bottom: none;
+  }
+  .user-table tr {
+    transition: all .2s ease;
+    position: relative;
+  }
+  .user-table tr:hover td {
+    background: #f8faff;
+  }
+  .user-table tr::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity .2s ease;
+  }
+  .user-table tr:hover::after {
+    opacity: 1;
+  }
+
+  .user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #eef0fd, #dbebff);
+    border: 1px solid #c8d0fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 13px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .user-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .user-name-text {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 14.5px;
+  }
+
+  .user-email-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 30px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    box-shadow: var(--shadow-sm);
+  }
+  .role-admin { background: #fff0f2; color: #ef476f; border: 1px solid #ffd3db; }
+  .role-user  { background: #e6faf5; color: #06d6a0; border: 1px solid #bdf2e4; }
+
+  .action-btn {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration: none;
+    transition: all .2s ease;
+    padding: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .action-btn:hover         { background: var(--primary-light); color: var(--primary); border-color: #c8d0fa; transform: translateY(-1px); }
+  .action-btn.danger:hover  { background: #fff0f0; color: #ef476f; border-color: #ffcccc; transform: translateY(-1px); }
+
+  .empty-state {
+    padding: 80px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: .4; display: block; color: var(--primary); }
+  .empty-state p { font-size: 14px; margin: 0; }
+
+  .search-bar {
+    position: relative;
+    max-width: 300px;
+    width: 100%;
+  }
+  .search-bar i {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  .search-bar input {
+    padding-left: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--surface);
+    width: 100%;
+    height: 40px;
+    outline: none;
+    transition: all .2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .search-bar input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+  }
+  .search-bar input::placeholder { color: #b4b9ce; }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,18,40,.48);
+    backdrop-filter: blur(3px);
+    z-index: 9100;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .22s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    width: 100%; max-width: 520px; margin: 16px;
+    max-height: 90vh; overflow-y: auto;
+    transform: translateY(22px) scale(.97);
+    transition: transform .25s cubic-bezier(.175,.885,.32,1.275);
+  }
+  .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    background: #fafbff; position: sticky; top: 0; z-index: 1;
+  }
+  .modal-head-title { font-size: 14.5px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .modal-close {
+    width: 28px; height: 28px; border-radius: 6px;
+    border: 1px solid var(--border); background: transparent;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 16px; transition: all .15s;
+  }
+  .modal-close:hover { background: #fff0f0; color: #e63946; border-color: #ffb3b3; }
+  .modal-body { padding: 22px; }
+  .modal-foot {
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px; border-top: 1px solid var(--border); background: #fafbff;
+  }
+
+  .mform-group { margin-bottom: 16px; }
+  .mform-label {
+    display: block; font-size: 11.5px; font-weight: 700;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: .4px; margin-bottom: 6px;
+  }
+  .mform-control {
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px;
+    color: var(--text); background: #fff; outline: none;
+    transition: border-color .18s, box-shadow .18s;
+  }
+  .mform-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(67,97,238,.1); }
+  .mform-control::placeholder { color: #b4b9ce; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin .7s linear infinite; display: inline-block; }
+</style>
+
+<div class="container-fluid mt-4 px-3 px-md-4 pt-4">
+
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+      <h2 class="pg-title mb-1">User Management</h2>
+      <small class="text-muted">Create, edit and manage portal users and access privileges</small>
+    </div>
+    <button class="btn-create" onclick="openCreateModal()">
+      <i class="bi bi-person-plus"></i> Create New User
+    </button>
+  </div>
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <span class="text-muted" style="font-size:13px;">
+      <% if (users && users.length) { %>
+        <strong style="color:var(--text)" id="userCount"><%= users.length %></strong> user<%= users.length !== 1 ? 's' : '' %> registered
+      <% } %>
+    </span>
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="text" id="searchInput" placeholder="Search users…" oninput="filterUsers()">
+    </div>
+  </div>
+
+  <div class="users-wrapper">
+    <div class="table-responsive">
+      <table class="table user-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Company</th>
+            <th>Templates</th>
+            <th>Phone</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersList">
+          <% if (users && users.length) { %>
+            <% users.forEach(function(u) { %>
+              <tr class="user-row" data-id="<%= u._id %>" data-name="<%= u.name.toLowerCase() %>" data-email="<%= u.email.toLowerCase() %>">
+                <td>
+                  <div class="user-name-cell">
+                    <div class="user-avatar">
+                      <%= u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) %>
+                    </div>
+                    <div>
+                      <div class="user-name-text"><%= u.name %></div>
+                      <div class="user-email-text"><%= u.email %></div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="role-badge role-<%= u.role %>">
+                    <%= u.role %>
+                  </span>
+                </td>
+                <td><%= u.company || '—' %></td>
+                <td>
+                  <span class="badge bg-secondary rounded-pill font-monospace" style="font-size:11px; font-weight:600; padding:4px 8px;">
+                    <%= u.templateCount %>
+                  </span>
+                </td>
+                <td><%= u.phone || '—' %></td>
+                <td class="text-end">
+                  <button class="action-btn" title="Edit User" 
+                          onclick="openEditModal('<%= u._id %>', '<%= u.name.replace(/'/g,`\\'`) %>', '<%= u.email.replace(/'/g,`\\'`) %>', '<%= u.role %>', '<%= (u.phone || '').replace(/'/g,`\\'`) %>', '<%= (u.company || '').replace(/'/g,`\\'`) %>', '<%= (u.bio || '').replace(/\n/g,'\\n').replace(/'/g,`\\'`) %>')">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="action-btn danger" title="Delete User" onclick="deleteUser('<%= u._id %>', '<%= u.name.replace(/'/g,`\\'`) %>', this)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="bi bi-people"></i>
+                  <p>No registered users found.</p>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- CREATE USER MODAL -->
+<div class="modal-overlay" id="createModal" onclick="handleOverlayClick(event, 'createModal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-title">
+        <i class="bi bi-person-plus text-primary"></i> Create New User
+      </div>
+      <button class="modal-close" onclick="closeCreateModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="createUserForm" onsubmit="submitCreateUser(event)">
+        <div class="mform-group">
+          <label class="mform-label">Full Name <span class="text-danger">*</span></label>
+          <input type="text" id="c_name" class="mform-control" placeholder="e.g. John Doe" required>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Email Address <span class="text-danger">*</span></label>
+          <input type="email" id="c_email" class="mform-control" placeholder="e.g. john@example.com" required>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Password <span class="text-danger">*</span></label>
+          <input type="password" id="c_password" class="mform-control" placeholder="Min. 8 characters" required minlength="8">
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">System Role</label>
+          <select id="c_role" class="mform-control">
+            <option value="user">User (Standard Access)</option>
+            <option value="admin">Admin (Full Administrative Access)</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mform-group">
+            <label class="mform-label">Phone Number</label>
+            <input type="text" id="c_phone" class="mform-control" placeholder="e.g. +1 555-0199">
+          </div>
+          <div class="col-md-6 mform-group">
+            <label class="mform-label">Company Name</label>
+            <input type="text" id="c_company" class="mform-control" placeholder="e.g. Acme Corp">
+          </div>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Short Biography</label>
+          <textarea id="c_bio" class="mform-control" rows="2" placeholder="Brief note about the user…"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm px-3" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm px-3 ms-2" form="createUserForm" id="c_submitBtn">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editModal" onclick="handleOverlayClick(event, 'editModal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-title">
+        <i class="bi bi-pencil text-primary"></i> Edit User Information
+      </div>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="editUserForm" onsubmit="submitEditUser(event)">
+        <input type="hidden" id="e_id">
+        <div class="mform-group">
+          <label class="mform-label">Full Name <span class="text-danger">*</span></label>
+          <input type="text" id="e_name" class="mform-control" placeholder="e.g. John Doe" required>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Email Address <span class="text-danger">*</span></label>
+          <input type="email" id="e_email" class="mform-control" placeholder="e.g. john@example.com" required>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">New Password <span class="text-muted">(Leave empty to keep unchanged)</span></label>
+          <input type="password" id="e_password" class="mform-control" placeholder="Min. 8 characters" minlength="8">
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">System Role</label>
+          <select id="e_role" class="mform-control">
+            <option value="user">User (Standard Access)</option>
+            <option value="admin">Admin (Full Administrative Access)</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mform-group">
+            <label class="mform-label">Phone Number</label>
+            <input type="text" id="e_phone" class="mform-control" placeholder="e.g. +1 555-0199">
+          </div>
+          <div class="col-md-6 mform-group">
+            <label class="mform-label">Company Name</label>
+            <input type="text" id="e_company" class="mform-control" placeholder="e.g. Acme Corp">
+          </div>
+        </div>
+        <div class="mform-group">
+          <label class="mform-label">Short Biography</label>
+          <textarea id="e_bio" class="mform-control" rows="2" placeholder="Brief note about the user…"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm px-3" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm px-3 ms-2" form="editUserForm" id="e_submitBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const notyf = new Notyf({
+    duration: 2500,
+    position: { x: 'right', y: 'top' },
+    ripple: false
+  });
+
+  function filterUsers() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(r => {
+      const match = r.dataset.name.includes(q) || r.dataset.email.includes(q);
+      r.style.display = match ? '' : 'none';
+    });
+  }
+
+  function handleOverlayClick(e, modalId) {
+    if (e.target === document.getElementById(modalId)) {
+      if (modalId === 'createModal') closeCreateModal();
+      if (modalId === 'editModal') closeEditModal();
+    }
+  }
+
+  // CREATE USER
+  function openCreateModal() {
+    document.getElementById('createUserForm').reset();
+    document.getElementById('createModal').classList.add('open');
+  }
+  function closeCreateModal() {
+    document.getElementById('createModal').classList.remove('open');
+  }
+  async function submitCreateUser(e) {
+    e.preventDefault();
+    const name = document.getElementById('c_name').value.trim();
+    const email = document.getElementById('c_email').value.trim();
+    const password = document.getElementById('c_password').value;
+    const role = document.getElementById('c_role').value;
+    const phone = document.getElementById('c_phone').value.trim();
+    const company = document.getElementById('c_company').value.trim();
+    const bio = document.getElementById('c_bio').value.trim();
+
+    const btn = document.getElementById('c_submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spin">↻</span> Creating…`;
+
+    try {
+      const res = await fetch('/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role, phone, company, bio })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        notyf.success('User created successfully!');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        notyf.error(data.message || 'Creation failed');
+      }
+    } catch {
+      notyf.error('Network error. Try again.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Create User';
+    }
+  }
+
+  // EDIT USER
+  function openEditModal(id, name, email, role, phone, company, bio) {
+    document.getElementById('e_id').value = id;
+    document.getElementById('e_name').value = name;
+    document.getElementById('e_email').value = email;
+    document.getElementById('e_role').value = role;
+    document.getElementById('e_phone').value = phone;
+    document.getElementById('e_company').value = company;
+    document.getElementById('e_bio').value = bio;
+    document.getElementById('e_password').value = '';
+    document.getElementById('editModal').classList.add('open');
+  }
+  function closeEditModal() {
+    document.getElementById('editModal').classList.remove('open');
+  }
+  async function submitEditUser(e) {
+    e.preventDefault();
+    const id = document.getElementById('e_id').value;
+    const name = document.getElementById('e_name').value.trim();
+    const email = document.getElementById('e_email').value.trim();
+    const password = document.getElementById('e_password').value;
+    const role = document.getElementById('e_role').value;
+    const phone = document.getElementById('e_phone').value.trim();
+    const company = document.getElementById('e_company').value.trim();
+    const bio = document.getElementById('e_bio').value.trim();
+
+    const btn = document.getElementById('e_submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spin">↻</span> Saving…`;
+
+    try {
+      const res = await fetch(`/admin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role, phone, company, bio })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        notyf.success('User details updated!');
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        notyf.error(data.message || 'Save failed');
+      }
+    } catch {
+      notyf.error('Network error. Try again.');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Save Changes';
+    }
+  }
+
+  // DELETE USER
+  async function deleteUser(id, name, btn) {
+    if (!confirm(`Are you sure you want to delete the user "${name}"?\nWARNING: All templates created by this user will also be permanently deleted! This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/admin/users/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        notyf.success('User and templates deleted!');
+        const row = btn.closest('tr');
+        row.style.transition = 'opacity .3s, transform .3s';
+        row.style.opacity = '0';
+        row.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          row.remove();
+          const countEl = document.getElementById('userCount');
+          if (countEl) {
+            const cur = parseInt(countEl.textContent);
+            countEl.textContent = isNaN(cur) ? '0' : Math.max(0, cur - 1);
+          }
+        }, 300);
+      } else {
+        notyf.error(data.message || 'Deletion failed');
+      }
+    } catch {
+      notyf.error('Network error. Try again.');
+    }
+  }
+</script>
+
+<%- include('../layouts/footer') %>

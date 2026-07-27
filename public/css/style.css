@@ -50,13 +50,12 @@ padding: 20px;
 }
 
 .footer {
-background: white;
-padding: 10px;
-position:fixed;
-left:0;
-bottom:0;
-width:100%;
-
+  padding: 24px 20px;
+  color: #7b809a;
+  font-size: 13px;
+  border-top: 1px solid #e6eaf4;
+  margin-top: 48px;
+  background: transparent;
 }
 
 .sidebar a {

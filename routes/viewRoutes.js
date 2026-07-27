@@ -3,7 +3,9 @@ const dashboardCtrl = require("../controllers/dashboardController");
 const templateCtrl = require("../controllers/templateController");
 const analyticsCtrl = require("../controllers/analyticsController");
 const projectCtrl    = require("../controllers/projectController");
+const userCtrl = require("../controllers/userController");
 const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 
 // AUTH PAGES
 router.get("/", (req,res)=>{
@@ -50,6 +52,25 @@ router.post("/templates/zoho-test/:id", auth, templateCtrl.testZohoConnection);
 router.get( "/templates/zoho-settings/:id", auth, templateCtrl.getZohoSettings);      
 router.put( "/templates/zoho-settings/:id", auth, templateCtrl.saveZohoSettings);   
 router.post("/api/form/:apiKey", templateCtrl.handleFormSubmit);
+
+// USER & TEMPLATE MANAGEMENT (ADMIN ONLY)
+router.get("/admin/users", auth, admin, userCtrl.getUsersPage);
+router.post("/admin/users", auth, admin, userCtrl.createUser);
+router.put("/admin/users/:id", auth, admin, userCtrl.updateUser);
+router.delete("/admin/users/:id", auth, admin, userCtrl.deleteUser);
+router.post("/admin/templates/transfer", auth, admin, userCtrl.transferTemplate);
+router.post("/admin/projects/transfer", auth, admin, userCtrl.transferProject);
+
+// Helper route to promote active user to Admin (safe for development bootstrap)
+router.get("/make-me-admin", auth, async (req, res) => {
+  try {
+    const User = require("../models/User");
+    await User.findByIdAndUpdate(req.user._id || req.user.id, { role: "admin" });
+    res.send("<h1>You are now an Admin!</h1><p>Please <a href='/dashboard'>go back to Dashboard</a> and refresh.</p>");
+  } catch (err) {
+    res.status(500).send("Error: " + err.message);
+  }
+});
 
 
 // ANALYTICS

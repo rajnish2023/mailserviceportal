@@ -195,10 +195,19 @@ exports.auth = async (req, res, next) => {
         : res.redirect('/');
     }
 
-    const user = await User.findById(decoded.id, 'name email role tokenVersion');
+    const user = await User.findById(decoded.id);
     if (!user || (user.tokenVersion || 0) !== (decoded.tokenVersion || 0)) {
       res.clearCookie('token', COOKIE_OPTIONS);
       return res.redirect('/');
+    }
+
+    // Auto-promote to admin if no admin exists in the system
+    if (user.role !== 'admin') {
+      const adminExists = await User.exists({ role: 'admin' });
+      if (!adminExists) {
+        user.role = 'admin';
+        await user.save();
+      }
     }
 
     req.user = user; 

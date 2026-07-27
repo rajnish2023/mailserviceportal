@@ -4,10 +4,13 @@ const Project = require('../models/Project');
 exports.getAnalytics = async (req, res) => {
   try {
     const userId = req.user._id || req.user.id;
+    const isAdmin = req.user.role === 'admin';
     const { templateId, status, from, to, page = 1, projectId: filterProjectId } = req.query;
     const limit = 15;
     const skip = (parseInt(page) - 1) * limit;
-    const userTemplates = await Template.find({ createdBy: userId }, '_id title');
+    
+    const tplQuery = isAdmin ? {} : { createdBy: userId };
+    const userTemplates = await Template.find(tplQuery, '_id title');
     const userTemplateIds = userTemplates.map(t => t._id);
     const filter = { templateId: { $in: userTemplateIds } };
     if (templateId) filter.templateId = templateId;

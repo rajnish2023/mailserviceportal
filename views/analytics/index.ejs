@@ -9,17 +9,27 @@
 
 <style>
   :root {
-    --primary:#4361ee;--primary-light:#eef0fd;
-    --success:#2ec4b6;--success-light:#e6faf8;
-    --warning:#f4a522;--warning-light:#fff8ec;
-    --danger:#e63946;--danger-light:#fff0f1;
-    --purple:#7c3aed;--purple-light:#f3eeff;
-    --bg:#f0f2f9;--surface:#ffffff;--border:#e2e5f0;
-    --text:#1a1d2e;--text-muted:#6b7194;
-    --radius:12px;--radius-sm:8px;
-    --shadow-sm:0 1px 4px rgba(0,0,0,.05);
-    --shadow:0 4px 20px rgba(0,0,0,.08);
-    --font:'Plus Jakarta Sans',sans-serif;
+    --primary:       #4361ee;
+    --primary-light: #eef0fd;
+    --primary-hover: #3451d1;
+    --success:       #06d6a0;
+    --success-light: #e6faf5;
+    --warning:       #ffd166;
+    --warning-light: #fffdf5;
+    --danger:        #ef476f;
+    --danger-light:  #fff0f3;
+    --purple:        #7c3aed;
+    --purple-light:  #f4f0ff;
+    --bg:            #f8f9fd;
+    --surface:       #ffffff;
+    --border:        #e6eaf4;
+    --text:          #0f111a;
+    --text-muted:    #7b809a;
+    --radius:        16px;
+    --radius-sm:     10px;
+    --shadow-sm:     0 4px 12px rgba(0, 0, 0, 0.03);
+    --shadow:        0 12px 30px rgba(0, 0, 0, 0.06);
+    --font:          'Plus Jakarta Sans', sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);}
@@ -310,7 +320,7 @@
 
 <script>
 const notyf = new Notyf({ duration: 2500, position: { x:'right', y:'top' }, ripple:false });
-const triggerMap =  JSON.stringify(triggerMap);
+const triggerMap = <%- JSON.stringify(triggerMap) %>;
 new Chart(document.getElementById('sourceChart').getContext('2d'),{
   type:'doughnut',
   data:{

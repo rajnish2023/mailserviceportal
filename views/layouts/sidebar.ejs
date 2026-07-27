@@ -7,7 +7,7 @@ function isActive(path) {
 }
 %>
 
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
@@ -17,28 +17,28 @@ function isActive(path) {
 :root {
   --sb-w:        240px;
   --sb-w-col:    68px;
-  --hdr-h:       56px;
+  --hdr-h:       64px;
 
-  --sb-bg:       #0f1117;
-  --sb-border:   rgba(255,255,255,.07);
+  --sb-bg:       #0c0e14;
+  --sb-border:   rgba(255,255,255,.06);
   --sb-accent:   #4361ee;
   --sb-accent-2: #7c3aed;
-  --sb-hover:    rgba(255,255,255,.06);
-  --sb-active-bg:rgba(67,97,238,.18);
-  --sb-text:     rgba(255,255,255,.6);
-  --sb-text-hov: rgba(255,255,255,.92);
+  --sb-hover:    rgba(255,255,255,.05);
+  --sb-active-bg:rgba(67,97,238,.15);
+  --sb-text:     rgba(255,255,255,.55);
+  --sb-text-hov: rgba(255,255,255,.95);
   --sb-text-act: #fff;
 
   --hdr-bg:      #ffffff;
-  --hdr-border:  #e4e7f0;
-  --hdr-text:    #1a1d2e;
-  --hdr-muted:   #7a829e;
+  --hdr-border:  #e6eaf4;
+  --hdr-text:    #0f111a;
+  --hdr-muted:   #7b809a;
 
-  --body-bg:     #f0f2f9;
-  --radius:      10px;
-  --radius-sm:   7px;
+  --body-bg:     #f8f9fd;
+  --radius:      16px;
+  --radius-sm:   10px;
   --font-h:      'Syne', sans-serif;
-  --font-b:      'DM Sans', sans-serif;
+  --font-b:      'Plus Jakarta Sans', sans-serif;
   --transition:  .2s cubic-bezier(.4,0,.2,1);
 }
 
@@ -148,7 +148,7 @@ html, body {
   color: var(--sb-text-hov);
 }
 .sb-item.active {
-  background: var(--sb-active-bg);
+  background: linear-gradient(135deg, rgba(67, 97, 238, 0.15) 0%, rgba(124, 58, 237, 0.1) 100%);
   color: var(--sb-text-act);
   font-weight: 600;
 }
@@ -157,9 +157,9 @@ html, body {
   content: '';
   position: absolute;
   left: 0; top: 6px; bottom: 6px;
-  width: 3px;
+  width: 3.5px;
   border-radius: 0 3px 3px 0;
-  background: var(--sb-accent);
+  background: linear-gradient(to bottom, var(--sb-accent), var(--sb-accent-2));
 }
  
 .sb-icon {
@@ -168,10 +168,10 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   font-size: 16px;
   flex-shrink: 0;
-  transition: background var(--transition);
+  transition: all var(--transition);
 }
-.sb-item:hover .sb-icon  { background: rgba(255,255,255,.07); }
-.sb-item.active .sb-icon { background: rgba(67,97,238,.3); color: #fff; }
+.sb-item:hover .sb-icon  { background: rgba(255,255,255,.07); transform: scale(1.05); }
+.sb-item.active .sb-icon { background: rgba(67,97,238,.24); color: #fff; }
 
 .sb-label {
   flex: 1;
@@ -198,15 +198,14 @@ html, body {
   top: 50%; transform: translateY(-50%);
   background: #1e2235;
   color: #fff;
-  font-size: 12px; font-weight: 500;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
-  white-space: nowrap;
-  opacity: 0; pointer-events: none;
-  border: 1px solid rgba(255,255,255,.1);
-  box-shadow: 0 4px 16px rgba(0,0,0,.3);
-  transition: opacity .15s;
-  z-index: 300;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+  z-index: 1000;
 }
 .sidebar.collapsed .sb-item:hover::after { opacity: 1; }
  
@@ -446,6 +445,16 @@ html, body {
       <div class="sb-icon"><i class="bi bi-folder2-open"></i></div>
       <span class="sb-label">Projects</span>
     </a>
+
+    <% if (typeof user !== 'undefined' && user.role === 'admin') { %>
+      <div class="sb-section">Admin</div>
+      <a href="/admin/users"
+         class="sb-item <%= isActive('/admin/users') %>"
+         data-tip="Users">
+        <div class="sb-icon"><i class="bi bi-people"></i></div>
+        <span class="sb-label">Users</span>
+      </a>
+    <% } %>
   </nav>
 
   <div class="sb-divider"></div>
