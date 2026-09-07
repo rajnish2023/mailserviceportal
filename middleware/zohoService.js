@@ -122,6 +122,8 @@ function mapFormDataToLead(formData = {}, customMapping = {}) {
     city:         'City',
     zip:          'Zip_Code',
     postalcode:   'Zip_Code',
+    FormName:     'FormName',
+
   };
 
   const map = { ...defaultMap, ...customMapping };
