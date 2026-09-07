@@ -116,7 +116,12 @@ function mapFormDataToLead(formData = {}, customMapping = {}) {
     subject:      'Lead_Source',
     title:        'Lead_Source',
     pageurl:      'PageUrl',
-    page_url:     'PageUrl'
+    page_url:     'PageUrl',
+    country:      'Country',
+    state:        'State',
+    city:         'City',
+    zip:          'Zip_Code',
+    postalcode:   'Zip_Code',
   };
 
   const map = { ...defaultMap, ...customMapping };
