@@ -115,6 +115,8 @@ function mapFormDataToLead(formData = {}, customMapping = {}) {
     description:  'Description',
     subject:      'Lead_Source',
     title:        'Lead_Source',
+    pageurl:      'PageUrl',
+    page_url:     'PageUrl'
   };
 
   const map = { ...defaultMap, ...customMapping };
