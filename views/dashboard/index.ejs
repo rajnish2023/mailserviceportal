@@ -526,9 +526,12 @@ function renderModal(log) {
       </div>
 
       ${log.errorMessage ? `
-      <div class="detail-row">
-        <span class="detail-key">Error</span>
-        <span class="detail-val" style="color:var(--danger);font-size:13px;">${log.errorMessage}</span>
+      <div style="grid-column: 1 / -1; margin-top: 10px; background: #fff0f0; border: 1px solid #ffb3b3; border-radius: 8px; padding: 12px 16px; color: var(--danger); font-size: 13px; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start;">
+        <i class="bi bi-exclamation-triangle-fill" style="margin-top: 2px;"></i>
+        <div>
+          <strong style="display: block; margin-bottom: 2px;">Delivery Error Note</strong>
+          ${log.errorMessage}
+        </div>
       </div>` : ''}
 
     </div>

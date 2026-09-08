@@ -158,41 +158,52 @@ function resolveRecipients(template, data) {
 }
  
 async function dispatchMail(template, data = {}, triggeredBy = 'form') {
-
   if (!template) throw new Error('Email template is required');
-  const { subject, html } = resolvePlaceholders(template, data);
-  const fromAddress = buildFrom(template, data);
-  const resolvedReplyTo = resolveString(template.replyTo || '', data);
-  const isReplyToValid = isValidEmail(resolvedReplyTo);
-  const recipients = resolveRecipients(template, data);
 
-  if (recipients.length === 0) {
-    throw new Error('No valid recipients defined');
-  }
-  const resolveList = (list = []) =>
-    list
-      .map(item => resolveString(item, data))
-      .filter(isValidEmail);
-
-  const cc = resolveList(template.cc);
-  const bcc = resolveList(template.bcc);
-  const mailOptions = {
-    from: fromAddress,
-    to: recipients.join(', '),
-    subject,
-    html,
-    ...(isReplyToValid && { replyTo: resolvedReplyTo }),
-
-    ...(cc.length > 0 && { cc: cc.join(', ') }),
-    ...(bcc.length > 0 && { bcc: bcc.join(', ') }),
-  };
-
-  let info;
+  let subject = '';
+  let html = '';
+  let fromAddress = '';
+  let recipients = [];
+  let cc = [];
+  let bcc = [];
+  let isReplyToValid = false;
+  let resolvedReplyTo = '';
 
   try {
+    const placeholders = resolvePlaceholders(template, data);
+    subject = placeholders.subject;
+    html = placeholders.html;
+    
+    fromAddress = buildFrom(template, data);
+    resolvedReplyTo = resolveString(template.replyTo || '', data);
+    isReplyToValid = isValidEmail(resolvedReplyTo);
+    recipients = resolveRecipients(template, data);
+
+    if (recipients.length === 0) {
+      throw new Error('No valid recipients defined');
+    }
+
+    const resolveList = (list = []) =>
+      list
+        .map(item => resolveString(item, data))
+        .filter(isValidEmail);
+
+    cc = resolveList(template.cc);
+    bcc = resolveList(template.bcc);
+    
+    const mailOptions = {
+      from: fromAddress,
+      to: recipients.join(', '),
+      subject,
+      html,
+      ...(isReplyToValid && { replyTo: resolvedReplyTo }),
+      ...(cc.length > 0 && { cc: cc.join(', ') }),
+      ...(bcc.length > 0 && { bcc: bcc.join(', ') }),
+    };
+
     console.log('Sending Mail:', mailOptions);
 
-    info = await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
     await EmailLog.create({
       templateId: template._id,
       templateTitle: template.title,
@@ -207,27 +218,26 @@ async function dispatchMail(template, data = {}, triggeredBy = 'form') {
       status: 'sent',
     });
 
+    return info;
   } catch (error) {
     console.error('Mail Error:', error.message);
     await EmailLog.create({
       templateId: template._id,
       templateTitle: template.title,
       triggeredBy,
-      subject,
-      to: recipients,
+      subject: subject || template.subject,
+      to: recipients.length ? recipients : (template.to || []),
       cc,
       bcc,
       formData: data,
       messageId: '',
-      fromAddress,
+      fromAddress: fromAddress || template.fromEmail || 'unknown',
       status: 'failed',
       errorMessage: error.message,
     }).catch(() => {});
 
     throw error;
   }
-
-  return info;
 }
 
 
